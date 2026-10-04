@@ -1,6 +1,8 @@
 import { orderEventStream } from '@/server/sse'
 
 export const dynamic = 'force-dynamic'
+/** Seconds; above the stream's own lifetime (STREAM_LIFETIME_MS), so the stream ends first. */
+export const maxDuration = 300
 
 /** Live status for one order. The code is unguessable, and only the status is sent. */
 export async function GET(request: Request, ctx: RouteContext<'/api/orders/[code]/events'>) {

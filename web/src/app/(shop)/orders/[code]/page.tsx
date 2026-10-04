@@ -12,6 +12,7 @@ import { CUSTOMER_LABEL, isFinal, type OrderStatus } from '@/domain/order-status
 import { maskedPhone } from '@/domain/phone'
 import { dayLabel, formatDateTime, formatTime, localDate } from '@/domain/time'
 import { getCustomer } from '@/server/auth/current'
+import { housekeepIfDue } from '@/server/housekeeping'
 import { orderDetails } from '@/server/orders'
 import { gateway } from '@/server/runtime'
 import { OrderActions } from './order-actions'
@@ -26,6 +27,7 @@ const STEPS: Record<'DELIVERY' | 'PICKUP', OrderStatus[]> = {
 
 export default async function OrderPage({ params }: PageProps<'/orders/[code]'>) {
   const { code } = await params
+  await housekeepIfDue() // so a lapsed online payment shows as lapsed
   const order = /^TL-[0-9A-Z]{6}$/.test(code) ? await orderDetails(db(), { code }) : null
   if (!order) notFound()
 
