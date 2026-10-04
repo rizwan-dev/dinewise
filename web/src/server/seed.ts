@@ -1,6 +1,8 @@
 import 'server-only'
-import { count } from 'drizzle-orm'
+import { count, getTableName, is, sql } from 'drizzle-orm'
+import { PgTable } from 'drizzle-orm/pg-core'
 import type { Db } from '@/db/client'
+import * as schema from '@/db/schema'
 import {
   addonGroups,
   addons,
@@ -326,6 +328,18 @@ const slug = (s: string) =>
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
+
+/**
+ * Empties every table and seeds the demo again. For a public demo only (DEMO_DAILY_RESET),
+ * where anyone can sign in as the manager and change the menu.
+ */
+export async function resetDemo(db: Db, staffPassword: string, now = new Date()) {
+  const tables = Object.values(schema)
+    .filter((value) => is(value, PgTable))
+    .map((table) => `"${getTableName(table)}"`)
+  await db.execute(sql.raw(`TRUNCATE ${tables.join(', ')} RESTART IDENTITY CASCADE`))
+  return seedDemo(db, staffPassword, now)
+}
 
 export async function seedDemo(db: Db, staffPassword: string, now = new Date()) {
   const [{ n } = { n: 0 }] = await db.select({ n: count() }).from(staff)

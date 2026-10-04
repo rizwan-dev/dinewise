@@ -2,9 +2,17 @@ import 'server-only'
 import { type OrderChange, subscribeToOrders } from './realtime'
 
 /**
+ * How long one stream lives before the server ends it. The browser's EventSource reconnects by
+ * itself, and the page catches up on reconnect, so nothing is missed. This keeps each stream
+ * inside a serverless function's time limit (route `maxDuration`), and costs a long-lived
+ * server one reconnect every few minutes.
+ */
+export const STREAM_LIFETIME_MS = 270_000
+
+/**
  * A Server-Sent Events response that forwards matching order changes until the browser goes
- * away. A comment line every 20 seconds keeps proxies from closing an idle connection, and
- * the browser's EventSource reconnects by itself if the connection drops.
+ * away or the stream's lifetime ends. A comment line every 20 seconds keeps proxies from
+ * closing an idle connection.
  */
 export async function orderEventStream(
   request: Request,
@@ -29,8 +37,10 @@ export async function orderEventStream(
         () => send('event: resync\ndata: {}\n\n'),
       )
       const heartbeat = setInterval(() => send(': keep-alive\n\n'), 20_000)
+      const lifetime = setTimeout(() => cleanup(), STREAM_LIFETIME_MS)
       cleanup = () => {
         clearInterval(heartbeat)
+        clearTimeout(lifetime)
         unsubscribe()
         try {
           controller.close()

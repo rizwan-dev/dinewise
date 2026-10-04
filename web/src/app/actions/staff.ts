@@ -10,6 +10,7 @@ import { parseRupees } from '@/domain/money'
 import { ORDER_STATUSES } from '@/domain/order-status'
 import { endSession, requireStaff, startSession } from '@/server/auth/current'
 import { authenticateStaff } from '@/server/auth/staff'
+import { serverless } from '@/server/env'
 import { type ActionResult, AppError, toResult } from '@/server/errors'
 import { setAvailability } from '@/server/menu'
 import { move } from '@/server/orders'
@@ -95,6 +96,7 @@ export async function uploadPhotoAction(
 ): Promise<ActionResult<{ imagePath: string }>> {
   return toResult(async () => {
     await requireStaff('MANAGER')
+    if (serverless()) throw new AppError('UPLOADS_OFF', 'Photo uploads are off in this hosted demo.')
     const file = form.get('photo')
     if (!(file instanceof File) || file.size === 0)
       throw new AppError('NO_FILE', 'Choose a photo first.', 'photo')

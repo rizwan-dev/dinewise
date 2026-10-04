@@ -10,6 +10,7 @@ import { asapSlot, orderSlots } from '@/domain/slots'
 import { getCustomer } from '@/server/auth/current'
 import { env } from '@/server/env'
 import { type ActionResult, AppError, toResult } from '@/server/errors'
+import { housekeepIfDue } from '@/server/housekeeping'
 import { loadMenu, menuById } from '@/server/menu'
 import { markPaid, placeOrder, slotCounts } from '@/server/orders'
 import { isValidCheckoutSignature } from '@/server/payments/razorpay'
@@ -103,6 +104,7 @@ export type SlotOption = { value: string; date: string; startsAt: string; full: 
 
 /** "As soon as possible" plus every schedulable slot over the next days. */
 export async function slotsAction(): Promise<{ asap: string | null; slots: SlotOption[] }> {
+  await housekeepIfDue()
   const now = new Date()
   const counts = await slotCounts(db(), now)
   const asap = asapSlot(now, counts)

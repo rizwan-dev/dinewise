@@ -15,8 +15,16 @@ export function pool(): Pool {
   globalForDb.dinewisePool ??= new Pool({
     connectionString: process.env.DATABASE_URL,
     max: Number(process.env.DATABASE_POOL_SIZE ?? 10),
+    // A serverless instance can be frozen at any moment; don't keep idle connections open
+    // across that.
+    idleTimeoutMillis: process.env.VERCEL ? 5_000 : 10_000,
   })
   return globalForDb.dinewisePool
+}
+
+/** A direct connection string, for what a transaction pooler cannot carry (LISTEN, session locks). */
+export function directDatabaseUrl(): string | undefined {
+  return process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL
 }
 
 export function db(): Db {

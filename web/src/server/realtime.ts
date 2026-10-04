@@ -1,6 +1,7 @@
 import 'server-only'
 import { EventEmitter } from 'node:events'
 import { Client } from 'pg'
+import { directDatabaseUrl } from '@/db/client'
 import type { OrderStatus } from '@/domain/order-status'
 
 /**
@@ -34,7 +35,7 @@ function state(): State {
 }
 
 async function connect(s: State): Promise<void> {
-  const client = new Client({ connectionString: process.env.DATABASE_URL })
+  const client = new Client({ connectionString: directDatabaseUrl() })
   client.on('notification', (msg) => {
     if (msg.channel !== 'orders' || !msg.payload) return
     try {

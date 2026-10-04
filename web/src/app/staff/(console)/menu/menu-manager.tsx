@@ -8,7 +8,16 @@ import { Alert, Button, Input, Label, Textarea, VegMark } from '@/components/ui'
 import { formatPaise } from '@/domain/money'
 import type { MenuEntry, MenuSection } from '@/server/menu'
 
-export function MenuManager({ sections, canEdit }: { sections: MenuSection[]; canEdit: boolean }) {
+export function MenuManager({
+  sections,
+  canEdit,
+  photoUploads,
+}: {
+  sections: MenuSection[]
+  canEdit: boolean
+  /** Off on serverless hosting, which has no disk to keep the photos on. */
+  photoUploads: boolean
+}) {
   const [editing, setEditing] = useState<number | null>(null)
   return (
     <div className="space-y-6">
@@ -23,7 +32,9 @@ export function MenuManager({ sections, canEdit }: { sections: MenuSection[]; ca
                   canEdit={canEdit}
                   onEdit={() => setEditing(editing === item.id ? null : item.id)}
                 />
-                {editing === item.id && <Editor item={item} onDone={() => setEditing(null)} />}
+                {editing === item.id && (
+                  <Editor item={item} photoUploads={photoUploads} onDone={() => setEditing(null)} />
+                )}
               </li>
             ))}
           </ul>
@@ -85,7 +96,15 @@ function Row({ item, canEdit, onEdit }: { item: MenuEntry; canEdit: boolean; onE
   )
 }
 
-function Editor({ item, onDone }: { item: MenuEntry; onDone: () => void }) {
+function Editor({
+  item,
+  photoUploads,
+  onDone,
+}: {
+  item: MenuEntry
+  photoUploads: boolean
+  onDone: () => void
+}) {
   const [name, setName] = useState(item.name)
   const [description, setDescription] = useState(item.description)
   const [price, setPrice] = useState((item.pricePaise / 100).toFixed(2))
@@ -132,35 +151,41 @@ function Editor({ item, onDone }: { item: MenuEntry; onDone: () => void }) {
         />
         Show as a bestseller
       </label>
-      <form
-        className="flex flex-wrap items-center gap-2"
-        onSubmit={(e) => {
-          e.preventDefault()
-          const form = new FormData(e.currentTarget)
-          start(async () => {
-            const result = await uploadPhotoAction(item.id, form)
-            setMessage(
-              result.ok
-                ? { tone: 'success', text: 'Photo updated.' }
-                : { tone: 'error', text: result.message },
-            )
-          })
-        }}
-      >
-        <label htmlFor={`photo-${item.id}`} className="text-sm font-medium">
-          Photo
-        </label>
-        <input
-          id={`photo-${item.id}`}
-          name="photo"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="min-w-0 flex-1 text-sm"
-        />
-        <Button type="submit" variant="secondary" busy={busy}>
-          Upload
-        </Button>
-      </form>
+      {photoUploads ? (
+        <form
+          className="flex flex-wrap items-center gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const form = new FormData(e.currentTarget)
+            start(async () => {
+              const result = await uploadPhotoAction(item.id, form)
+              setMessage(
+                result.ok
+                  ? { tone: 'success', text: 'Photo updated.' }
+                  : { tone: 'error', text: result.message },
+              )
+            })
+          }}
+        >
+          <label htmlFor={`photo-${item.id}`} className="text-sm font-medium">
+            Photo
+          </label>
+          <input
+            id={`photo-${item.id}`}
+            name="photo"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="min-w-0 flex-1 text-sm"
+          />
+          <Button type="submit" variant="secondary" busy={busy}>
+            Upload
+          </Button>
+        </form>
+      ) : (
+        <p className="text-sm text-stone-500">
+          Photo uploads are off in this hosted demo. Run it with Docker to try them.
+        </p>
+      )}
       <div className="flex gap-2">
         <Button
           busy={busy}
