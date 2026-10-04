@@ -12,6 +12,12 @@ the database.
 
 **Next.js 16 · React 19 · TypeScript · PostgreSQL · Drizzle · Tailwind · Razorpay · Docker · Playwright**
 
+**Try it: [dinewise-web.vercel.app](https://dinewise-web.vercel.app)**. Sign in with any Indian
+mobile number (the code is shown on screen). The kitchen is at
+[`/staff`](https://dinewise-web.vercel.app/staff): `kitchen@tadkalane.example` or
+`manager@tadkalane.example`, password `tadka-demo-2026`. Payments are Razorpay test mode, so no
+real money moves, and the demo resets every night.
+
 <p>
   <img src="docs/screenshots/phone-home.png" width="24%" alt="Home page on a phone">
   <img src="docs/screenshots/phone-menu.png" width="24%" alt="Menu with photos, veg marks and search">
