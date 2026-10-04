@@ -52,7 +52,7 @@ export function MenuBrowser({ sections }: { sections: MenuSection[] }) {
 
   return (
     <div>
-      <div className="bg-cream/95 sticky top-16 z-10 -mx-4 space-y-3 px-4 pt-2 pb-3 backdrop-blur">
+      <div className="bg-cream/95 sticky top-16 z-20 -mx-4 space-y-3 px-4 pt-2 pb-3 backdrop-blur">
         <div className="flex gap-2">
           <label htmlFor="menu-search" className="sr-only">
             Search the menu
@@ -96,11 +96,11 @@ export function MenuBrowser({ sections }: { sections: MenuSection[] }) {
 
       <div className="space-y-8">
         {visible.map((section) => (
-          <section key={section.id} id={section.slug} className="scroll-mt-40">
+          <section key={section.id} id={section.slug} className="scroll-mt-56">
             <h2 className="font-display mb-3 text-2xl font-semibold">{section.name}</h2>
             <ul className="divide-y divide-stone-200 rounded-2xl bg-white ring-1 ring-stone-200">
               {section.items.map((item) => (
-                <li key={item.id} id={item.slug} className="flex scroll-mt-40 gap-4 p-4">
+                <li key={item.id} id={item.slug} className="flex scroll-mt-56 gap-4 p-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <VegMark veg={item.veg} />

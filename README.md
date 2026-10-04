@@ -157,7 +157,7 @@ cd e2e && pnpm install && pnpm exec playwright install chromium && pnpm test
 | ----------------- | ------------------------------------------------------------------------------------------------------ |
 | Unit (42)         | Pricing and extras, coupons, GST rounding, kitchen slots, tables, order status, Razorpay signatures    |
 | Integration (38)  | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates |
-| End to end (6)    | A full order with the kitchen on a tablet and live tracking, a booking, sold out, rejection, layout    |
+| End to end (7)    | A full order with the kitchen on a tablet and live tracking, a booking, sold out, rejection, layout and stacking |
 
 ## Photo credits
 

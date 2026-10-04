@@ -1,5 +1,5 @@
 import { devices, expect, type Page, test } from '@playwright/test'
-import { signInCustomer, staffPage } from './support'
+import { signInCustomer, staffPage, testPhone } from './support'
 
 /** Regenerates the README screenshots: `pnpm screenshots` with the demo stack running. */
 
@@ -44,7 +44,7 @@ test.describe('phone', () => {
     await page.screenshot({ path: `${OUT}/phone-cart.png`, fullPage: true })
 
     await page.getByRole('link', { name: /Continue to checkout/ }).click()
-    await page.getByLabel('Mobile number').fill('9822011002')
+    await page.getByLabel('Mobile number').fill(testPhone())
     await page.getByRole('button', { name: 'Send code' }).click()
     await page.screenshot({ path: `${OUT}/phone-sign-in.png` })
     await page.getByRole('button', { name: 'Fill it in' }).click()

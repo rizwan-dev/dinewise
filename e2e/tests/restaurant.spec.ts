@@ -68,6 +68,19 @@ test('nothing on a phone screen scrolls sideways', async ({ page }) => {
   }
 })
 
+test('the menu search bar stays on top of dishes scrolling under it', async ({ page }) => {
+  await page.goto('/menu')
+  for (const scroll of [300, 700, 1200]) {
+    await page.evaluate((y) => window.scrollTo(0, y), scroll)
+    const onTop = await page.evaluate(() => {
+      const input = document.getElementById('menu-search')!
+      const box = input.getBoundingClientRect()
+      return document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2) === input
+    })
+    expect(onTop, `scrolled to ${scroll}px`).toBe(true)
+  }
+})
+
 test('customers cannot reach staff pages', async ({ page }) => {
   await signInCustomer(page)
   await page.goto('/staff')
