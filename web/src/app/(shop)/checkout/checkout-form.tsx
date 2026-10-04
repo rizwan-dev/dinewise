@@ -122,7 +122,9 @@ export function CheckoutForm({
         saveAddress,
         slot: when === 'ASAP' ? 'ASAP' : slot,
         paymentMethod: payment,
-        couponCode: prefs.couponCode || null,
+        // Only a coupon the bill on screen includes. A remembered code that no longer applies
+        // (the order is too small, it was used up) must not block the order.
+        couponCode: shownQuote?.quote?.couponCode ?? null,
         notes: notes || null,
       })
       if (!result.ok) {
@@ -387,7 +389,9 @@ export function CheckoutForm({
             </p>
           )}
           {shownQuote?.couponMessage && (
-            <p className="text-chilli-600 mt-2 text-sm">{shownQuote.couponMessage}</p>
+            <p className="text-chilli-600 mt-2 text-sm">
+              {shownQuote.couponMessage} The total above is without it.
+            </p>
           )}
         </Card>
         {error && error.field !== 'slot' && <Alert>{error.message}</Alert>}

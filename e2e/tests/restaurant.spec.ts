@@ -44,7 +44,7 @@ test('a rejected order tells the customer why', async ({ page, browser }) => {
   await page.getByRole('radio', { name: 'Pickup' }).click()
   await page.getByRole('link', { name: /Continue to checkout/ }).click()
   await page.getByLabel('Name').fill('Rohan Patil')
-  await expect(page.getByText('Cash at pickup')).toBeVisible()
+  await page.getByText('Cash at pickup').click()
   await page.getByRole('button', { name: /Place order/ }).click()
   await expect(page.getByRole('heading', { name: 'Order received' })).toBeVisible()
   const code = (await page.getByText(/^Order TL-/).textContent())!.replace('Order ', '').trim()
@@ -55,7 +55,31 @@ test('a rejected order tells the customer why', async ({ page, browser }) => {
   await card.getByRole('button', { name: 'Item out of stock' }).click()
 
   await expect(page.getByRole('heading', { name: 'Could not be accepted' })).toBeVisible()
-  await expect(page.getByRole('alert').filter({ hasText: 'could not accept' })).toContainText('Item out of stock')
+  await expect(page.getByRole('alert').filter({ hasText: 'could not accept' })).toContainText(
+    'Item out of stock',
+  )
+})
+
+test('a remembered coupon that no longer applies does not block the order', async ({ page }) => {
+  await signInCustomer(page)
+  await page.goto('/menu')
+  await page.getByRole('button', { name: 'Add Butter Chicken' }).click()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /^Add ·/ })
+    .click() // Half, ₹260
+  await page.goto('/cart')
+  await page.getByRole('radio', { name: 'Pickup' }).click()
+  await page.getByLabel('Coupon code').fill('WELCOME50')
+  await page.getByRole('button', { name: 'Apply' }).click()
+  await expect(page.getByText('WELCOME50 needs an order of ₹300 or more.')).toBeVisible()
+
+  await page.getByRole('link', { name: /Continue to checkout/ }).click()
+  await page.getByLabel('Name').fill('Meera Kulkarni')
+  await expect(page.getByText('The total above is without it.')).toBeVisible()
+  await page.getByText('Cash at pickup').click()
+  await page.getByRole('button', { name: /Place order/ }).click()
+  await expect(page.getByRole('heading', { name: 'Order received' })).toBeVisible()
 })
 
 test('nothing on a phone screen scrolls sideways', async ({ page }) => {
@@ -63,7 +87,9 @@ test('nothing on a phone screen scrolls sideways', async ({ page }) => {
   for (const path of ['/', '/menu', '/cart', '/book', '/account']) {
     await page.goto(path)
     await page.waitForLoadState('networkidle')
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    )
     expect(overflow, path).toBe(0)
   }
 })

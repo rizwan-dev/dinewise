@@ -33,7 +33,10 @@ test.describe('phone', () => {
     await page.getByRole('dialog').getByText('Extra raita').click()
     await imagesLoaded(page)
     await page.screenshot({ path: `${OUT}/phone-dish.png` })
-    await page.getByRole('dialog').getByRole('button', { name: /^Add ·/ }).click()
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: /^Add ·/ })
+      .click()
 
     await page.getByRole('button', { name: 'Add Butter Naan' }).click()
     await page.goto('/cart')
@@ -50,7 +53,10 @@ test.describe('phone', () => {
     await page.getByRole('button', { name: 'Fill it in' }).click()
     await page.getByRole('button', { name: 'Verify and continue' }).click()
     await page.getByLabel('Name').fill('Priya Joshi')
-    await page.getByLabel('House or flat, building and street').fill('Flat 12, Sunrise Apartments, Baner Road')
+    await page
+      .getByLabel('House or flat, building and street')
+      .fill('Flat 12, Sunrise Apartments, Baner Road')
+    await page.getByText('Cash on delivery').click()
     await page.getByRole('button', { name: /Place order/ }).click()
     await expect(page.getByRole('heading', { name: 'Order received' })).toBeVisible()
     await page.screenshot({ path: `${OUT}/phone-tracking.png` })

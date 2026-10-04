@@ -38,7 +38,7 @@ test('an order goes from the menu to the door, live', async ({ page, browser }) 
   await page.getByLabel('Name').fill('Priya Joshi')
   await page.getByLabel('House or flat, building and street').fill('Flat 12, Sunrise Apartments, Baner Road')
   await expect(page.getByLabel('Pincode')).toHaveValue('411045')
-  await expect(page.getByText('Cash on delivery')).toBeVisible()
+  await page.getByText('Cash on delivery').click()
   await page.getByRole('button', { name: 'Place order · ₹567' }).click()
 
   await expect(page.getByRole('heading', { name: 'Order received' })).toBeVisible()
