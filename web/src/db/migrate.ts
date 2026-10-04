@@ -10,10 +10,10 @@ import type { Pool } from 'pg'
 export async function runMigrations(pool: Pool, folder = path.join(process.cwd(), 'drizzle')) {
   const client = await pool.connect()
   try {
-    await client.query("SELECT pg_advisory_lock(hashtext('tadka:migrations'))")
+    await client.query("SELECT pg_advisory_lock(hashtext('dinewise:migrations'))")
     await migrate(drizzle(client), { migrationsFolder: folder })
   } finally {
-    await client.query("SELECT pg_advisory_unlock(hashtext('tadka:migrations'))").catch(() => {})
+    await client.query("SELECT pg_advisory_unlock(hashtext('dinewise:migrations'))").catch(() => {})
     client.release()
   }
 }

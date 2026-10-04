@@ -1,11 +1,14 @@
-# Tadka Lane: restaurant ordering
+# Dinewise
 
-[![CI](https://github.com/rizwan-dev/restaurant-online-ordering/actions/workflows/ci.yml/badge.svg)](https://github.com/rizwan-dev/restaurant-online-ordering/actions/workflows/ci.yml)
+[![CI](https://github.com/rizwan-dev/dinewise/actions/workflows/ci.yml/badge.svg)](https://github.com/rizwan-dev/dinewise/actions/workflows/ci.yml)
 
-Online ordering, table bookings and a live kitchen screen for a neighbourhood Indian restaurant.
-Customers order from their phones for delivery or pickup and pay online through Razorpay or in
-cash. The kitchen works from a tablet on the counter, and every order updates live on the
-customer's screen.
+**Online ordering, table bookings and a live kitchen screen for a restaurant.** Customers order
+from their phones for delivery or pickup and pay online through Razorpay or in cash. The kitchen
+works from a tablet on the counter, and every order updates live on the customer's screen.
+
+One installation runs one restaurant. Its name, hours, delivery area, fees and tax live in
+[`web/src/config/restaurant.ts`](web/src/config/restaurant.ts); its menu, tables and staff live in
+the database.
 
 **Next.js 16 · React 19 · TypeScript · PostgreSQL · Drizzle · Tailwind · Razorpay · Docker · Playwright**
 
@@ -18,8 +21,8 @@ customer's screen.
 
 ![The kitchen screen on a tablet](docs/screenshots/tablet-kitchen.png)
 
-*Tadka Lane is a fictional restaurant used for the demo. Dish photos are free stock photos from
-Pexels (credited below).*
+_The demo runs Tadka Lane, a fictional North Indian restaurant in Pune. Dish photos are free
+stock photos from Pexels (credited below)._
 
 ## What to look at
 
@@ -80,7 +83,7 @@ Most customers order from a mid-range Android phone, often on mobile data:
 - the order page follows the kitchen live; customers can cancel until cooking starts, and
   reorder a past order in one tap.
 
-For staff, the [kitchen screen](web/src/app/staff/(console)/kitchen-board.tsx) is built for a
+For staff, the [kitchen screen](<web/src/app/staff/(console)/kitchen-board.tsx>) is built for a
 tablet on the counter: one large button for the next step, a chime for new orders, late orders
 in red, and the cash to collect on each ticket. Marking a dish sold out takes it off sale at
 once. Managers also edit dishes and upload photos (re-encoded to WebP, which strips location
@@ -98,15 +101,15 @@ flowchart LR
     R -->|signed webhooks| N
 ```
 
-| Path                 | What it is                                                                     |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `web/src/domain`     | Pure rules: pricing, coupons, GST, kitchen slots, tables, order status         |
-| `web/src/server`     | Checkout, payments, sign-in, bookings, sales, live updates                     |
-| `web/drizzle`        | Migrations, including the hand-written constraints and the notify trigger      |
-| `web/src/app/(shop)` | The customer's pages                                                           |
-| `web/src/app/staff`  | Kitchen, menu, bookings and sales                                              |
-| `web/tests`          | Services against real PostgreSQL in Testcontainers                             |
-| `e2e`                | Playwright on an emulated Pixel 7 against the Docker stack                     |
+| Path                 | What it is                                                                |
+| -------------------- | ------------------------------------------------------------------------- |
+| `web/src/domain`     | Pure rules: pricing, coupons, GST, kitchen slots, tables, order status    |
+| `web/src/server`     | Checkout, payments, sign-in, bookings, sales, live updates                |
+| `web/drizzle`        | Migrations, including the hand-written constraints and the notify trigger |
+| `web/src/app/(shop)` | The customer's pages                                                      |
+| `web/src/app/staff`  | Kitchen, menu, bookings and sales                                         |
+| `web/tests`          | Services against real PostgreSQL in Testcontainers                        |
+| `e2e`                | Playwright on an emulated Pixel 7 against the Docker stack                |
 
 ## Run it
 
@@ -116,7 +119,7 @@ You need Docker.
 docker compose up --build
 ```
 
-Open <http://localhost:8082>. The first start creates the demo restaurant.
+Open <http://localhost:8082>. The first start creates the demo restaurant, Tadka Lane.
 
 - **Order as a customer:** sign in with any Indian mobile number. No SMS is sent; the code is
   shown on screen.
@@ -153,44 +156,44 @@ cd e2e && pnpm install && pnpm exec playwright install chromium && pnpm test
 
 ## Tests
 
-| Suite             | What it covers                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| Unit (42)         | Pricing and extras, coupons, GST rounding, kitchen slots, tables, order status, Razorpay signatures    |
-| Integration (38)  | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates |
-| End to end (7)    | A full order with the kitchen on a tablet and live tracking, a booking, sold out, rejection, layout and stacking |
+| Suite            | What it covers                                                                                                                   |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Unit (42)        | Pricing and extras, coupons, GST rounding, kitchen slots, tables, order status, Razorpay signatures                              |
+| Integration (38) | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates                        |
+| End to end (8)   | A full order with the kitchen on a tablet and live tracking, a booking, sold out, rejection, a stale coupon, layout and stacking |
 
 ## Photo credits
 
 Free photos from [Pexels](https://www.pexels.com/license/), resized for the demo. Hara Bhara
 Kebab and Gajar Halwa use an illustration because no honest match was available.
 
-| Dish | Photo |
-| ---- | ----- |
-| Amritsari Fish | [Pexels](https://www.pexels.com/photo/20258816/) |
-| Butter Chicken | [Pexels](https://www.pexels.com/photo/37295815/) |
-| Butter Naan | [Pexels](https://www.pexels.com/photo/12737662/) |
-| Chicken Dum Biryani | [Pexels](https://www.pexels.com/photo/4224304/) |
-| Chicken Tikka | [Pexels](https://www.pexels.com/photo/6522616/) |
-| Dal Khichdi | [Pexels](https://www.pexels.com/photo/6363498/) |
-| Dal Makhani | [Pexels](https://www.pexels.com/photo/37182514/) |
-| Fresh Lime Soda | [Pexels](https://www.pexels.com/photo/36268523/) |
-| Garlic Naan | [Pexels](https://www.pexels.com/photo/16851842/) |
-| Gulab Jamun | [Pexels](https://www.pexels.com/photo/7406887/) |
-| Home page spread | [Pexels](https://www.pexels.com/photo/9792458/) |
-| Jeera Rice | [Pexels](https://www.pexels.com/photo/28674713/) |
-| Kadai Mushroom | [Pexels](https://www.pexels.com/photo/35041660/) |
-| Laccha Paratha | [Pexels](https://www.pexels.com/photo/39833390/) |
-| Masala Chaas | [Pexels](https://www.pexels.com/photo/8489749/) |
-| Masala Chai | [Pexels](https://www.pexels.com/photo/20270270/) |
-| Masala Papad | [Pexels](https://www.pexels.com/photo/34347890/) |
-| Mutton Rogan Josh | [Pexels](https://www.pexels.com/photo/9609846/) |
+| Dish                 | Photo                                            |
+| -------------------- | ------------------------------------------------ |
+| Amritsari Fish       | [Pexels](https://www.pexels.com/photo/20258816/) |
+| Butter Chicken       | [Pexels](https://www.pexels.com/photo/37295815/) |
+| Butter Naan          | [Pexels](https://www.pexels.com/photo/12737662/) |
+| Chicken Dum Biryani  | [Pexels](https://www.pexels.com/photo/4224304/)  |
+| Chicken Tikka        | [Pexels](https://www.pexels.com/photo/6522616/)  |
+| Dal Khichdi          | [Pexels](https://www.pexels.com/photo/6363498/)  |
+| Dal Makhani          | [Pexels](https://www.pexels.com/photo/37182514/) |
+| Fresh Lime Soda      | [Pexels](https://www.pexels.com/photo/36268523/) |
+| Garlic Naan          | [Pexels](https://www.pexels.com/photo/16851842/) |
+| Gulab Jamun          | [Pexels](https://www.pexels.com/photo/7406887/)  |
+| Home page spread     | [Pexels](https://www.pexels.com/photo/9792458/)  |
+| Jeera Rice           | [Pexels](https://www.pexels.com/photo/28674713/) |
+| Kadai Mushroom       | [Pexels](https://www.pexels.com/photo/35041660/) |
+| Laccha Paratha       | [Pexels](https://www.pexels.com/photo/39833390/) |
+| Masala Chaas         | [Pexels](https://www.pexels.com/photo/8489749/)  |
+| Masala Chai          | [Pexels](https://www.pexels.com/photo/20270270/) |
+| Masala Papad         | [Pexels](https://www.pexels.com/photo/34347890/) |
+| Mutton Rogan Josh    | [Pexels](https://www.pexels.com/photo/9609846/)  |
 | Paneer Butter Masala | [Pexels](https://www.pexels.com/photo/11115801/) |
-| Paneer Tikka | [Pexels](https://www.pexels.com/photo/33430556/) |
-| Rasmalai | [Pexels](https://www.pexels.com/photo/39973385/) |
-| Sweet Lassi | [Pexels](https://www.pexels.com/photo/8917283/) |
-| Tadka Lane Thali | [Pexels](https://www.pexels.com/photo/36885763/) |
-| Tandoori Roti | [Pexels](https://www.pexels.com/photo/12737800/) |
-| Veg Dum Biryani | [Pexels](https://www.pexels.com/photo/9738983/) |
+| Paneer Tikka         | [Pexels](https://www.pexels.com/photo/33430556/) |
+| Rasmalai             | [Pexels](https://www.pexels.com/photo/39973385/) |
+| Sweet Lassi          | [Pexels](https://www.pexels.com/photo/8917283/)  |
+| Tadka Lane Thali     | [Pexels](https://www.pexels.com/photo/36885763/) |
+| Tandoori Roti        | [Pexels](https://www.pexels.com/photo/12737800/) |
+| Veg Dum Biryani      | [Pexels](https://www.pexels.com/photo/9738983/)  |
 
 ## Licence
 

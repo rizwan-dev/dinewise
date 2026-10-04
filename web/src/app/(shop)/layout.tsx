@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BottomBar, CartButton, DesktopNav } from '@/components/shop-chrome'
+import { PRODUCT } from '@/config/product'
 import { RESTAURANT } from '@/config/restaurant'
 
 export default function ShopLayout({ children }: LayoutProps<'/'>) {
@@ -9,7 +10,7 @@ export default function ShopLayout({ children }: LayoutProps<'/'>) {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
           <Link href="/" className="flex items-center gap-2">
             <span className="bg-saffron-700 font-display flex size-9 items-center justify-center rounded-xl text-lg font-bold text-white">
-              T
+              {RESTAURANT.name.charAt(0)}
             </span>
             <span className="font-display text-xl font-semibold tracking-tight">{RESTAURANT.name}</span>
           </Link>
@@ -29,7 +30,13 @@ export default function ShopLayout({ children }: LayoutProps<'/'>) {
             <strong className="text-ink">{RESTAURANT.name}</strong> · {RESTAURANT.address.street},{' '}
             {RESTAURANT.address.city}
           </p>
-          <p>A demo restaurant for an open-source ordering app. Orders are not real.</p>
+          <p>
+            A demo restaurant; orders are not real. Ordering by{' '}
+            <a href={PRODUCT.sourceUrl} className="text-ink font-semibold underline-offset-2 hover:underline">
+              {PRODUCT.name}
+            </a>
+            .
+          </p>
         </div>
       </footer>
       <BottomBar />

@@ -5,6 +5,8 @@
  * Razorpay order come from our server; this just opens Razorpay's own payment window.
  */
 
+import { RESTAURANT } from '@/config/restaurant'
+
 type RazorpayResponse = { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }
 
 type RazorpayOptions = {
@@ -57,7 +59,7 @@ export async function payWithRazorpay(args: {
       order_id: args.providerOrderId,
       amount: args.amountPaise,
       currency: 'INR',
-      name: 'Tadka Lane',
+      name: RESTAURANT.name,
       description: `Order ${args.orderCode}`,
       prefill: args.prefill,
       theme: { color: '#c2410c' },

@@ -21,15 +21,15 @@ RUN pnpm build
 FROM node:24-alpine
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0 UPLOAD_DIR=/data/uploads
-RUN addgroup -S tadka && adduser -S tadka -G tadka && mkdir -p /data/uploads && chown tadka:tadka /data/uploads
+RUN addgroup -S dinewise && adduser -S dinewise -G dinewise && mkdir -p /data/uploads && chown dinewise:dinewise /data/uploads
 
-COPY --from=build --chown=tadka:tadka /app/.next/standalone ./
-COPY --from=build --chown=tadka:tadka /app/.next/static ./.next/static
-COPY --from=build --chown=tadka:tadka /app/public ./public
+COPY --from=build --chown=dinewise:dinewise /app/.next/standalone ./
+COPY --from=build --chown=dinewise:dinewise /app/.next/static ./.next/static
+COPY --from=build --chown=dinewise:dinewise /app/public ./public
 # Migrations run at start-up (see src/instrumentation.ts), so they ship with the server.
-COPY --from=build --chown=tadka:tadka /app/drizzle ./drizzle
+COPY --from=build --chown=dinewise:dinewise /app/drizzle ./drizzle
 
-USER tadka
+USER dinewise
 EXPOSE 3000
 VOLUME /data/uploads
 

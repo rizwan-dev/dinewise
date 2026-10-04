@@ -19,7 +19,7 @@ export type StoredLine = CartLine & {
   unitPricePaise: number
 }
 
-const STORAGE_KEY = 'tadka:cart:v1'
+const STORAGE_KEY = 'dinewise:cart:v1'
 const listeners = new Set<() => void>()
 let lines: StoredLine[] = []
 let loaded = false
@@ -104,7 +104,7 @@ export function useCart() {
 
 export type CheckoutPrefs = { fulfilment: 'DELIVERY' | 'PICKUP'; pincode: string; couponCode: string }
 
-const PREFS_KEY = 'tadka:checkout:v1'
+const PREFS_KEY = 'dinewise:checkout:v1'
 const DEFAULT_PREFS: CheckoutPrefs = { fulfilment: 'DELIVERY', pincode: '', couponCode: '' }
 
 /** Choices made on the cart page, carried to checkout and remembered for next time. */

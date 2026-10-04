@@ -9,24 +9,24 @@ export type Executor = Db | Tx
 
 // One pool per process. In development the module is re-evaluated on every edit, so the pool
 // is kept on globalThis rather than leaking a new one each time.
-const globalForDb = globalThis as unknown as { tadkaPool?: Pool; tadkaDb?: Db }
+const globalForDb = globalThis as unknown as { dinewisePool?: Pool; dinewiseDb?: Db }
 
 export function pool(): Pool {
-  globalForDb.tadkaPool ??= new Pool({
+  globalForDb.dinewisePool ??= new Pool({
     connectionString: process.env.DATABASE_URL,
     max: Number(process.env.DATABASE_POOL_SIZE ?? 10),
   })
-  return globalForDb.tadkaPool
+  return globalForDb.dinewisePool
 }
 
 export function db(): Db {
-  globalForDb.tadkaDb ??= drizzle(pool(), { schema })
-  return globalForDb.tadkaDb
+  globalForDb.dinewiseDb ??= drizzle(pool(), { schema })
+  return globalForDb.dinewiseDb
 }
 
 /** For tests: point the module at another pool. */
 export function setDb(p: Pool): Db {
-  globalForDb.tadkaPool = p
-  globalForDb.tadkaDb = drizzle(p, { schema })
-  return globalForDb.tadkaDb
+  globalForDb.dinewisePool = p
+  globalForDb.dinewiseDb = drizzle(p, { schema })
+  return globalForDb.dinewiseDb
 }

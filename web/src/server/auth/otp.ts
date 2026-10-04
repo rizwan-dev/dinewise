@@ -1,5 +1,6 @@
 import 'server-only'
 import { and, count, desc, eq, gt, isNull, lt, sql } from 'drizzle-orm'
+import { RESTAURANT } from '@/config/restaurant'
 import type { Executor } from '@/db/client'
 import { customers, otpChallenges, smsOutbox } from '@/db/schema'
 import { normaliseIndianMobile } from '@/domain/phone'
@@ -89,7 +90,7 @@ async function issueCode(exec: Executor, secret: string, now: Date, phone: strin
   })
   await exec.insert(smsOutbox).values({
     phone,
-    body: `${code} is your Tadka Lane sign-in code. It expires in 5 minutes. Do not share it.`,
+    body: `${code} is your ${RESTAURANT.name} sign-in code. It expires in 5 minutes. Do not share it.`,
     createdAt: now,
   })
 }

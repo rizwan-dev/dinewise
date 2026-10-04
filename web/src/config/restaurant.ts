@@ -2,7 +2,7 @@
  * The restaurant's own rules. Kept in code, not the database: they change rarely, a change
  * deserves a review, and every rule here is covered by a test.
  *
- * "Tadka Lane" is a fictional restaurant used for the demo.
+ * "Tadka Lane" is a fictional restaurant used for the Dinewise demo.
  */
 export const RESTAURANT = {
   name: 'Tadka Lane',

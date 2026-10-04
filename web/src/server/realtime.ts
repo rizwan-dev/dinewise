@@ -21,16 +21,16 @@ export type OrderChange = {
 
 type State = { emitter: EventEmitter; client?: Client; connecting?: Promise<void> }
 
-const globalForRealtime = globalThis as unknown as { tadkaRealtime?: State }
+const globalForRealtime = globalThis as unknown as { dinewiseRealtime?: State }
 
 function state(): State {
-  if (!globalForRealtime.tadkaRealtime) {
+  if (!globalForRealtime.dinewiseRealtime) {
     const emitter = new EventEmitter()
     // Every open kitchen screen and tracking page is a listener.
     emitter.setMaxListeners(0)
-    globalForRealtime.tadkaRealtime = { emitter }
+    globalForRealtime.dinewiseRealtime = { emitter }
   }
-  return globalForRealtime.tadkaRealtime
+  return globalForRealtime.dinewiseRealtime
 }
 
 async function connect(s: State): Promise<void> {

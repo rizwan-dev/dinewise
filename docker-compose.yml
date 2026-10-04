@@ -1,20 +1,23 @@
-# The whole restaurant on one machine: `docker compose up --build`, then open http://localhost:8082
+# Dinewise on one machine: `docker compose up --build`, then open http://localhost:8082
 #
-# Demo settings: the database is seeded with the Tadka Lane menu, one-time codes are shown on
-# screen instead of being texted, and cookies work over plain HTTP. Online payment appears when
-# RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET (test mode) are set; cash works without them.
+# Demo settings: the database is seeded with the menu of Tadka Lane, a fictional restaurant,
+# one-time codes are shown on screen instead of being texted, and cookies work over plain HTTP.
+# Online payment appears when RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET (test mode) are set; cash
+# works without them.
+
+name: dinewise
 
 services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: tadka
-      POSTGRES_USER: tadka
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tadka}
+      POSTGRES_DB: dinewise
+      POSTGRES_USER: dinewise
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dinewise}
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U tadka -d tadka']
+      test: ['CMD-SHELL', 'pg_isready -U dinewise -d dinewise']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -24,7 +27,7 @@ services:
     ports:
       - '8082:3000'
     environment:
-      DATABASE_URL: postgres://tadka:${POSTGRES_PASSWORD:-tadka}@db:5432/tadka
+      DATABASE_URL: postgres://dinewise:${POSTGRES_PASSWORD:-dinewise}@db:5432/dinewise
       APP_URL: ${APP_URL:-http://localhost:8082}
       AUTH_SECRET: ${AUTH_SECRET:-demo-only-secret-change-me-in-production-0001}
       DEMO_SEED: 'true'
