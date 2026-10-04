@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { DishImage } from '@/components/dish-image'
 import { ButtonLink, Card, VegMark } from '@/components/ui'
@@ -23,7 +24,17 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-10">
-      <section className="from-saffron-600 to-saffron-700 overflow-hidden rounded-3xl bg-gradient-to-br px-6 py-10 text-white md:px-12 md:py-16">
+      <section className="relative isolate overflow-hidden rounded-3xl bg-stone-900 px-6 py-10 text-white md:px-12 md:py-20">
+        <Image
+          src="/hero.webp"
+          alt=""
+          fill
+          priority
+          sizes="(max-width: 1152px) 100vw, 1152px"
+          className="-z-10 object-cover"
+        />
+        {/* Darkened towards the text so it stays readable over any part of the photo. */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-stone-950/90 via-stone-950/65 to-stone-950/20" />
         <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm font-medium">
           <span className={`size-2 rounded-full ${open ? 'bg-green-300' : 'bg-stone-300'}`} />
           {open ? 'Open now' : 'Closed now'}
@@ -32,7 +43,7 @@ export default async function HomePage() {
         <h1 className="font-display max-w-xl text-4xl leading-tight font-semibold md:text-5xl">
           Home-style North Indian food, cooked to order.
         </h1>
-        <p className="text-saffron-50/90 mt-3 max-w-lg">
+        <p className="mt-3 max-w-lg text-stone-100">
           {RESTAURANT.tagline}. Delivery, pickup and table bookings.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">

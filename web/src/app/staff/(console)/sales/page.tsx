@@ -61,7 +61,7 @@ export default async function SalesPage({ searchParams }: PageProps<'/staff/sale
               {sales.byHour.map((h) => (
                 <li
                   key={h.hour}
-                  className="flex flex-1 flex-col items-center gap-1"
+                  className="flex max-w-12 flex-1 flex-col items-center gap-1"
                   title={`${h.orders} orders, ${formatPaise(h.revenuePaise)}`}
                 >
                   <span className="text-xs font-semibold">{h.orders}</span>

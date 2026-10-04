@@ -22,7 +22,11 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: '6mb' },
   },
   images: {
-    localPatterns: [{ pathname: '/media/menu/**', search: '' }],
+    localPatterns: [
+      { pathname: '/media/menu/**', search: '' },
+      { pathname: '/menu/**', search: '' },
+      { pathname: '/hero.webp', search: '' },
+    ],
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]

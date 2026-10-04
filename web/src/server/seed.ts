@@ -292,6 +292,34 @@ const MENU: { name: string; items: SeedItem[] }[] = [
   },
 ]
 
+/** Dishes with a photo in public/menu (free Pexels photos; credits in the README). */
+const PHOTOS = new Set([
+  'amritsari-fish',
+  'butter-chicken',
+  'butter-naan',
+  'chicken-dum-biryani',
+  'chicken-tikka',
+  'dal-khichdi',
+  'dal-makhani',
+  'fresh-lime-soda',
+  'garlic-naan',
+  'gulab-jamun',
+  'jeera-rice',
+  'kadai-mushroom',
+  'laccha-paratha',
+  'masala-chaas',
+  'masala-chai',
+  'masala-papad',
+  'mutton-rogan-josh',
+  'paneer-butter-masala',
+  'paneer-tikka',
+  'rasmalai',
+  'sweet-lassi',
+  'tadka-lane-thali',
+  'tandoori-roti',
+  'veg-dum-biryani',
+])
+
 const slug = (s: string) =>
   s
     .toLowerCase()
@@ -327,6 +355,7 @@ export async function seedDemo(db: Db, staffPassword: string, now = new Date()) 
             veg: item.veg,
             spice: item.spice ?? 0,
             bestseller: item.bestseller ?? false,
+            imagePath: PHOTOS.has(slug(item.name)) ? `/menu/${slug(item.name)}.webp` : null,
             position: ii,
           })
           .returning({ id: menuItems.id })
