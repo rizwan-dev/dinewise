@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+
+  /* Saffron and turmeric warmth, with a deep curry-leaf green for actions. */
+  --color-cream: #fdf8f0;
+  --color-saffron-50: #fff7ed;
+  --color-saffron-100: #ffedd5;
+  --color-saffron-200: #fed7aa;
+  --color-saffron-400: #fb923c;
+  --color-saffron-500: #f97316;
+  --color-saffron-600: #ea580c;
+  --color-saffron-700: #c2410c;
+  --color-leaf-50: #f0fdf4;
+  --color-leaf-600: #15803d;
+  --color-leaf-700: #166534;
+  --color-leaf-800: #14532d;
+  --color-chilli-600: #b91c1c;
+  --color-ink: #1c1917;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-cream text-ink antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-leaf-600 outline-2 outline-offset-2;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
