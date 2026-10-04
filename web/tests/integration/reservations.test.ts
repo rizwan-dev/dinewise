@@ -10,7 +10,11 @@ const EIGHT_PM = localInstant('2026-10-05', '20:00')
 describe('table reservations', () => {
   it('books the smallest table that fits', async () => {
     const priya = await customer()
-    const booking = await book(db, { customerId: priya.id, startsAt: EIGHT_PM.toISOString(), partySize: 2 }, NOW)
+    const booking = await book(
+      db,
+      { customerId: priya.id, startsAt: EIGHT_PM.toISOString(), partySize: 2 },
+      NOW,
+    )
     expect(booking).toMatchObject({ table: 'T1' })
     expect(booking.code).toMatch(/^TB-/)
   })
@@ -50,7 +54,11 @@ describe('table reservations', () => {
   it('offers only future times within the booking window, for parties it can seat', async () => {
     const priya = await customer()
     await expect(
-      book(db, { customerId: priya.id, startsAt: localInstant('2026-10-05', '17:00').toISOString(), partySize: 2 }, NOW),
+      book(
+        db,
+        { customerId: priya.id, startsAt: localInstant('2026-10-05', '17:00').toISOString(), partySize: 2 },
+        NOW,
+      ),
     ).rejects.toMatchObject({ code: 'TIME_UNAVAILABLE' })
     await expect(
       book(db, { customerId: priya.id, startsAt: EIGHT_PM.toISOString(), partySize: 12 }, NOW),
@@ -60,7 +68,11 @@ describe('table reservations', () => {
 
   it('frees the table when a guest cancels', async () => {
     const people = await Promise.all([customer('+919822014000'), customer('+919822014001')])
-    const first = await book(db, { customerId: people[0]!.id, startsAt: EIGHT_PM.toISOString(), partySize: 8 }, NOW)
+    const first = await book(
+      db,
+      { customerId: people[0]!.id, startsAt: EIGHT_PM.toISOString(), partySize: 8 },
+      NOW,
+    )
     await expect(
       book(db, { customerId: people[1]!.id, startsAt: EIGHT_PM.toISOString(), partySize: 8 }, NOW),
     ).rejects.toMatchObject({ code: 'TIME_UNAVAILABLE' })

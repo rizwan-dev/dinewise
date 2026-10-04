@@ -1,15 +1,5 @@
 import { sql } from 'drizzle-orm'
-import {
-  boolean,
-  check,
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  serial,
-  text,
-  timestamp,
-} from 'drizzle-orm/pg-core'
+import { boolean, check, index, integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core'
 import type { OrderStatus } from '@/domain/order-status'
 
 /**
@@ -158,7 +148,9 @@ export const addonGroups = pgTable(
     maxSelect: integer('max_select').notNull().default(1),
     position: integer('position').notNull().default(0),
   },
-  (t) => [check('addon_groups_range', sql`${t.minSelect} >= 0 and ${t.maxSelect} >= greatest(${t.minSelect}, 1)`)],
+  (t) => [
+    check('addon_groups_range', sql`${t.minSelect} >= 0 and ${t.maxSelect} >= greatest(${t.minSelect}, 1)`),
+  ],
 )
 
 export const addons = pgTable(
@@ -250,10 +242,7 @@ export const orders = pgTable(
       sql`${t.totalPaise} = ${t.subtotalPaise} - ${t.discountPaise} + ${t.packagingPaise} + ${t.deliveryFeePaise} + ${t.taxPaise}`,
     ),
     check('orders_discount_within_subtotal', sql`${t.discountPaise} between 0 and ${t.subtotalPaise}`),
-    check(
-      'orders_address_iff_delivery',
-      sql`(${t.fulfilment} = 'DELIVERY') = (${t.address} is not null)`,
-    ),
+    check('orders_address_iff_delivery', sql`(${t.fulfilment} = 'DELIVERY') = (${t.address} is not null)`),
     index('orders_customer').on(t.customerId, t.createdAt),
     index('orders_slot').on(t.slotStart),
     index('orders_status').on(t.status, t.slotStart),

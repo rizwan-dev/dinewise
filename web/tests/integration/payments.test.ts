@@ -1,7 +1,15 @@
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { orderEvents, payments } from '../../src/db/schema'
-import { expireUnpaid, markPaid, markRefunded, move, orderDetails, placeOrder, slotCounts } from '../../src/server/orders'
+import {
+  expireUnpaid,
+  markPaid,
+  markRefunded,
+  move,
+  orderDetails,
+  placeOrder,
+  slotCounts,
+} from '../../src/server/orders'
 import { customer, FakeGateway, NOW, pickupOrder, settle } from './helpers'
 import { db } from './setup'
 
@@ -57,7 +65,10 @@ describe('online payment', () => {
 
     await markPaid({ db, gateway, now: NOW }, placed.payment!.providerOrderId, 'pay_late')
 
-    expect(await orderDetails(db, { id: placed.id })).toMatchObject({ status: 'EXPIRED', paymentStatus: 'REFUND_PENDING' })
+    expect(await orderDetails(db, { id: placed.id })).toMatchObject({
+      status: 'EXPIRED',
+      paymentStatus: 'REFUND_PENDING',
+    })
     expect(gateway.refunds).toEqual([{ paymentId: 'pay_late', amountPaise: 609_00 }])
 
     await markRefunded(db, 'pay_late')
@@ -69,7 +80,11 @@ describe('online payment', () => {
     const placed = await onlineOrder(gateway)
     await markPaid({ db, gateway, now: NOW }, placed.payment!.providerOrderId, 'pay_ok')
 
-    await move(db, { orderId: placed.id, to: 'REJECTED', actor: 'KITCHEN', note: 'Gas supply problem' }, gateway)
+    await move(
+      db,
+      { orderId: placed.id, to: 'REJECTED', actor: 'KITCHEN', note: 'Gas supply problem' },
+      gateway,
+    )
 
     expect(gateway.refunds).toEqual([{ paymentId: 'pay_ok', amountPaise: 609_00 }])
     const [payment] = await db.select().from(payments).where(eq(payments.orderId, placed.id))

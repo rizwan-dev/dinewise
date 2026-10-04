@@ -68,7 +68,9 @@ export async function slotCounts(exec: Executor, now: Date, slotStart?: Date): P
     .from(orders)
     .where(
       and(
-        slotStart ? eq(orders.slotStart, slotStart) : gte(orders.slotStart, new Date(now.getTime() - 60 * 60_000)),
+        slotStart
+          ? eq(orders.slotStart, slotStart)
+          : gte(orders.slotStart, new Date(now.getTime() - 60 * 60_000)),
         notInArray(orders.status, RELEASED),
         or(sql`${orders.status} <> 'AWAITING_PAYMENT'`, gt(orders.paymentDueAt, now)),
       ),
@@ -77,9 +79,15 @@ export async function slotCounts(exec: Executor, now: Date, slotStart?: Date): P
   return new Map(rows.map((r) => [r.slot.getTime(), r.n]))
 }
 
-export async function placeOrder({ db, gateway, now = new Date() }: Deps, input: PlaceOrderInput): Promise<PlacedOrder> {
+export async function placeOrder(
+  { db, gateway, now = new Date() }: Deps,
+  input: PlaceOrderInput,
+): Promise<PlacedOrder> {
   if (input.paymentMethod === 'ONLINE' && !gateway) {
-    throw new AppError('ONLINE_PAYMENT_OFF', 'Online payment is not available right now. Choose pay on delivery.')
+    throw new AppError(
+      'ONLINE_PAYMENT_OFF',
+      'Online payment is not available right now. Choose pay on delivery.',
+    )
   }
   if (input.fulfilment === 'DELIVERY' && !input.address) {
     throw new AppError('ADDRESS_REQUIRED', 'Choose a delivery address.', 'address')
@@ -100,7 +108,9 @@ export async function placeOrder({ db, gateway, now = new Date() }: Deps, input:
         tx
           .select({ n: count() })
           .from(couponRedemptions)
-          .where(and(eq(couponRedemptions.couponCode, code), eq(couponRedemptions.customerId, input.customerId))),
+          .where(
+            and(eq(couponRedemptions.couponCode, code), eq(couponRedemptions.customerId, input.customerId)),
+          ),
         tx
           .select({ n: count() })
           .from(orders)
@@ -139,7 +149,9 @@ export async function placeOrder({ db, gateway, now = new Date() }: Deps, input:
         ...priced.totals,
         couponCode: priced.couponCode,
         notes: input.notes?.trim() || null,
-        paymentDueAt: online ? new Date(now.getTime() + RESTAURANT.ordering.paymentWindowMinutes * 60_000) : null,
+        paymentDueAt: online
+          ? new Date(now.getTime() + RESTAURANT.ordering.paymentWindowMinutes * 60_000)
+          : null,
         createdAt: now,
         updatedAt: now,
       })
@@ -185,8 +197,17 @@ export async function placeOrder({ db, gateway, now = new Date() }: Deps, input:
     }
   } catch (error) {
     console.error(error)
-    await move(db, { orderId: placed.id, to: 'EXPIRED', actor: 'SYSTEM', note: 'Payment could not be started', now })
-    throw new AppError('PAYMENT_UNAVAILABLE', 'We could not start the payment. Please try again or pay on delivery.')
+    await move(db, {
+      orderId: placed.id,
+      to: 'EXPIRED',
+      actor: 'SYSTEM',
+      note: 'Payment could not be started',
+      now,
+    })
+    throw new AppError(
+      'PAYMENT_UNAVAILABLE',
+      'We could not start the payment. Please try again or pay on delivery.',
+    )
   }
 }
 
@@ -251,7 +272,10 @@ export async function markPaid(
       .set({ status: tooLate ? 'REFUND_PENDING' : 'PAID', providerPaymentId, updatedAt: now })
       .where(eq(payments.id, payment.id))
     if (tooLate) {
-      await tx.update(orders).set({ paymentStatus: 'REFUND_PENDING', updatedAt: now }).where(eq(orders.id, order.id))
+      await tx
+        .update(orders)
+        .set({ paymentStatus: 'REFUND_PENDING', updatedAt: now })
+        .where(eq(orders.id, order.id))
       await tx.insert(orderEvents).values({
         orderId: order.id,
         status: order.status,
@@ -264,7 +288,9 @@ export async function markPaid(
         .update(orders)
         .set({ status: 'PLACED', paymentStatus: 'PAID', paymentDueAt: null, updatedAt: now })
         .where(eq(orders.id, order.id))
-      await tx.insert(orderEvents).values({ orderId: order.id, status: 'PLACED', actor: 'SYSTEM', note: 'Paid online', at: now })
+      await tx
+        .insert(orderEvents)
+        .values({ orderId: order.id, status: 'PLACED', actor: 'SYSTEM', note: 'Paid online', at: now })
     }
     return { code: order.code, alreadyApplied: false, refund: tooLate }
   })
@@ -285,11 +311,20 @@ export async function startRefund({ db, gateway }: Deps, providerOrderId: string
   const [payment] = await db
     .select()
     .from(payments)
-    .where(and(eq(payments.providerOrderId, providerOrderId), eq(payments.status, 'REFUND_PENDING'), isNull(payments.refundId)))
+    .where(
+      and(
+        eq(payments.providerOrderId, providerOrderId),
+        eq(payments.status, 'REFUND_PENDING'),
+        isNull(payments.refundId),
+      ),
+    )
   if (!payment?.providerPaymentId || !gateway) return
   try {
     const refund = await gateway.refund(payment.providerPaymentId, payment.amountPaise)
-    await db.update(payments).set({ refundId: refund.id, updatedAt: new Date() }).where(eq(payments.id, payment.id))
+    await db
+      .update(payments)
+      .set({ refundId: refund.id, updatedAt: new Date() })
+      .where(eq(payments.id, payment.id))
   } catch (error) {
     console.error('Refund request failed; it stays pending for a retry', error)
   }
@@ -303,7 +338,10 @@ export async function markRefunded(db: Db, providerPaymentId: string, now = new 
       .where(and(eq(payments.providerPaymentId, providerPaymentId), eq(payments.status, 'REFUND_PENDING')))
       .returning({ orderId: payments.orderId })
     if (payment) {
-      await tx.update(orders).set({ paymentStatus: 'REFUNDED', updatedAt: now }).where(eq(orders.id, payment.orderId))
+      await tx
+        .update(orders)
+        .set({ paymentStatus: 'REFUNDED', updatedAt: now })
+        .where(eq(orders.id, payment.orderId))
     }
   })
 }
@@ -317,9 +355,14 @@ export async function expireUnpaid(db: Db, now = new Date()): Promise<number> {
       .where(and(eq(orders.status, 'AWAITING_PAYMENT'), lt(orders.paymentDueAt, now)))
       .returning({ id: orders.id })
     if (expired.length) {
-      await tx
-        .insert(orderEvents)
-        .values(expired.map((o) => ({ orderId: o.id, status: 'EXPIRED' as const, actor: 'SYSTEM' as const, at: now })))
+      await tx.insert(orderEvents).values(
+        expired.map((o) => ({
+          orderId: o.id,
+          status: 'EXPIRED' as const,
+          actor: 'SYSTEM' as const,
+          at: now,
+        })),
+      )
     }
     return expired.length
   })
@@ -366,9 +409,18 @@ export async function move(
         .set({ status: 'REFUND_PENDING', updatedAt: now })
         .where(and(eq(payments.orderId, order.id), eq(payments.status, 'PAID')))
     }
-    await tx.insert(orderEvents).values({ orderId: order.id, status: args.to, actor: args.actor, note: args.note?.trim() || null, at: now })
+    await tx.insert(orderEvents).values({
+      orderId: order.id,
+      status: args.to,
+      actor: args.actor,
+      note: args.note?.trim() || null,
+      at: now,
+    })
     const [payment] = refund
-      ? await tx.select({ providerOrderId: payments.providerOrderId }).from(payments).where(eq(payments.orderId, order.id))
+      ? await tx
+          .select({ providerOrderId: payments.providerOrderId })
+          .from(payments)
+          .where(eq(payments.orderId, order.id))
       : []
     return { code: order.code, status: args.to, refundFor: payment?.providerOrderId }
   })
@@ -389,7 +441,11 @@ export async function orderDetails(exec: Executor, where: { code: string } | { i
   if (!order) return null
   const [items, events] = await Promise.all([
     exec.select().from(orderItems).where(eq(orderItems.orderId, order.id)).orderBy(asc(orderItems.id)),
-    exec.select().from(orderEvents).where(eq(orderEvents.orderId, order.id)).orderBy(asc(orderEvents.at), asc(orderEvents.id)),
+    exec
+      .select()
+      .from(orderEvents)
+      .where(eq(orderEvents.orderId, order.id))
+      .orderBy(asc(orderEvents.at), asc(orderEvents.id)),
   ])
   return { ...order, items, events }
 }
@@ -443,7 +499,10 @@ export async function reorderLines(exec: Executor, customerId: number, code: str
     const variant = current.variants.find((v) => v.name === item.variantName)
     if (current.variants.length && !variant) continue
     const wanted = new Set(item.addons.map((a) => a.id))
-    const addonIds = current.addonGroups.flatMap((g) => g.addons).filter((a) => wanted.has(a.id)).map((a) => a.id)
+    const addonIds = current.addonGroups
+      .flatMap((g) => g.addons)
+      .filter((a) => wanted.has(a.id))
+      .map((a) => a.id)
     lines.push({ itemId: current.id, variantId: variant?.id ?? null, addonIds, quantity: item.quantity })
   }
   return lines

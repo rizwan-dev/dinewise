@@ -118,10 +118,20 @@ describe('the whole bill', () => {
   })
 
   it('charges the pincode delivery fee, and delivers free above ₹800', () => {
-    const small = quote({ lines: [{ itemId: 1, quantity: 1 }], menu, fulfilment: 'DELIVERY', pincode: '411021' })
+    const small = quote({
+      lines: [{ itemId: 1, quantity: 1 }],
+      menu,
+      fulfilment: 'DELIVERY',
+      pincode: '411021',
+    })
     expect(small.totals.deliveryFeePaise).toBe(40_00)
 
-    const large = quote({ lines: [{ itemId: 1, quantity: 3 }], menu, fulfilment: 'DELIVERY', pincode: '411021' })
+    const large = quote({
+      lines: [{ itemId: 1, quantity: 3 }],
+      menu,
+      fulfilment: 'DELIVERY',
+      pincode: '411021',
+    })
     expect(large.totals.deliveryFeePaise).toBe(0)
   })
 

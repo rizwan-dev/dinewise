@@ -22,7 +22,13 @@ async function dayBookings(exec: Executor, date: string): Promise<Booking[]> {
   return exec
     .select({ tableId: reservations.tableId, startsAt: reservations.startsAt, endsAt: reservations.endsAt })
     .from(reservations)
-    .where(and(gte(reservations.endsAt, from), lt(reservations.startsAt, to), inArray(reservations.status, [...HOLDING])))
+    .where(
+      and(
+        gte(reservations.endsAt, from),
+        lt(reservations.startsAt, to),
+        inArray(reservations.status, [...HOLDING]),
+      ),
+    )
 }
 
 const activeTables = (exec: Executor) =>
@@ -45,7 +51,10 @@ export async function book(
   const start = new Date(input.startsAt)
   const { maxPartySize, durationMinutes } = RESTAURANT.reservations
   if (!Number.isInteger(input.partySize) || input.partySize < 1 || input.partySize > maxPartySize) {
-    throw new AppError('PARTY_SIZE', `We take bookings for 1 to ${maxPartySize} people. Call us for larger groups.`)
+    throw new AppError(
+      'PARTY_SIZE',
+      `We take bookings for 1 to ${maxPartySize} people. Call us for larger groups.`,
+    )
   }
   if (Number.isNaN(start.getTime())) throw new AppError('INVALID_TIME', 'Choose a time.')
   const date = localDate(start)
@@ -57,7 +66,8 @@ export async function book(
       throw new AppError('TIME_UNAVAILABLE', 'That time has just been taken. Please choose another.')
     }
     const table = chooseTable(await activeTables(tx), input.partySize, start, await dayBookings(tx, date))
-    if (!table) throw new AppError('TIME_UNAVAILABLE', 'That time has just been taken. Please choose another.')
+    if (!table)
+      throw new AppError('TIME_UNAVAILABLE', 'That time has just been taken. Please choose another.')
 
     const [row] = await tx
       .insert(reservations)

@@ -1,6 +1,10 @@
 import 'server-only'
 import { z } from 'zod'
 
+/** An unset variable often arrives as "" (e.g. `KEY=` in Compose); treat that as unset. */
+const optional = <T extends z.ZodType>(type: T) =>
+  z.preprocess((v) => (v === '' ? undefined : v), type.optional())
+
 /**
  * Configuration from the environment, checked once. A missing or malformed setting stops the
  * server at start-up with a clear message instead of failing on the first order.
@@ -12,21 +16,31 @@ const schema = z
     APP_URL: z.url().default('http://localhost:3000'),
     /** Keys the hashes of one-time codes, so a leaked table cannot be brute-forced offline. */
     AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
+    /** Where uploaded menu photos are kept (a volume in Docker). */
+    UPLOAD_DIR: z.string().default('./uploads'),
     /** Fill an empty database with the demo restaurant on start-up. */
     DEMO_SEED: z
       .enum(['true', 'false'])
       .default('false')
       .transform((v) => v === 'true'),
     /** Password for the seeded demo staff accounts. Required when DEMO_SEED is true. */
-    DEMO_STAFF_PASSWORD: z.string().min(8).optional(),
+    DEMO_STAFF_PASSWORD: optional(z.string().min(8)),
     /**
      * Show one-time codes on the sign-in screen instead of sending SMS. For the demo and
      * tests only; a real deployment plugs in an SMS provider.
      */
     SMS_MODE: z.enum(['outbox', 'log']).default('outbox'),
-    RAZORPAY_KEY_ID: z.string().startsWith('rzp_').optional(),
-    RAZORPAY_KEY_SECRET: z.string().min(1).optional(),
-    RAZORPAY_WEBHOOK_SECRET: z.string().min(1).optional(),
+    RAZORPAY_KEY_ID: optional(z.string().startsWith('rzp_')),
+    RAZORPAY_KEY_SECRET: optional(z.string().min(1)),
+    RAZORPAY_WEBHOOK_SECRET: optional(z.string().min(1)),
+    /**
+     * Behind a reverse proxy that sets X-Forwarded-For, trust its last entry as the client IP
+     * (for rate limiting). Off by default: without a proxy, that header is whatever the client sent.
+     */
+    TRUST_PROXY: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((v) => v === 'true'),
     /** Session cookies get the Secure flag unless explicitly turned off for plain-HTTP local runs. */
     COOKIE_SECURE: z
       .enum(['true', 'false'])

@@ -25,7 +25,7 @@ export function db(): Db {
 }
 
 /** For tests: point the module at another pool. */
-export function useDb(p: Pool): Db {
+export function setDb(p: Pool): Db {
   globalForDb.tadkaPool = p
   globalForDb.tadkaDb = drizzle(p, { schema })
   return globalForDb.tadkaDb

@@ -9,7 +9,12 @@ function collect() {
   const waitFor = (n: number) =>
     new Promise<void>((resolve, reject) => {
       const started = Date.now()
-      const check = () => (seen.length >= n ? resolve() : Date.now() - started > 5_000 ? reject(new Error(`saw ${seen.length}`)) : setTimeout(check, 20))
+      const check = () =>
+        seen.length >= n
+          ? resolve()
+          : Date.now() - started > 5_000
+            ? reject(new Error(`saw ${seen.length}`))
+            : setTimeout(check, 20)
       check()
     })
   return { seen, waitFor }

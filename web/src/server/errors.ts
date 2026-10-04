@@ -14,8 +14,7 @@ export class AppError extends Error {
 }
 
 export type ActionResult<T = void> =
-  | { ok: true; data: T }
-  | { ok: false; code: string; message: string; field?: string }
+  { ok: true; data: T } | { ok: false; code: string; message: string; field?: string }
 
 /** Runs an action body, turning expected errors into a result and logging the rest. */
 export async function toResult<T>(body: () => Promise<T>): Promise<ActionResult<T>> {
@@ -28,7 +27,11 @@ export async function toResult<T>(body: () => Promise<T>): Promise<ActionResult<
     }
     const named = error as { name?: string; code?: string; message?: string }
     if (named?.name === 'CartError' || named?.name === 'CouponError') {
-      return { ok: false, code: named.code ?? 'INVALID', message: named.message ?? 'Please check your order.' }
+      return {
+        ok: false,
+        code: named.code ?? 'INVALID',
+        message: named.message ?? 'Please check your order.',
+      }
     }
     console.error(error)
     return { ok: false, code: 'INTERNAL', message: 'Something went wrong on our side. Please try again.' }
@@ -38,5 +41,8 @@ export async function toResult<T>(body: () => Promise<T>): Promise<ActionResult<
 /** Next.js signals redirect() and notFound() by throwing; those must pass through. */
 function isRedirectOrNotFound(error: unknown): boolean {
   const digest = (error as { digest?: unknown })?.digest
-  return typeof digest === 'string' && (digest.startsWith('NEXT_REDIRECT') || digest.startsWith('NEXT_HTTP_ERROR_FALLBACK'))
+  return (
+    typeof digest === 'string' &&
+    (digest.startsWith('NEXT_REDIRECT') || digest.startsWith('NEXT_HTTP_ERROR_FALLBACK'))
+  )
 }

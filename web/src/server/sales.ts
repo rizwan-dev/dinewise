@@ -11,7 +11,11 @@ const NOT_SALES = ['AWAITING_PAYMENT', 'CANCELLED', 'REJECTED', 'EXPIRED'] as co
 export async function salesForDay(exec: Executor, date: string) {
   const from = localInstant(date, '00:00')
   const to = localInstant(addDays(date, 1), '00:00')
-  const sold = and(gte(orders.createdAt, from), lt(orders.createdAt, to), notInArray(orders.status, [...NOT_SALES]))
+  const sold = and(
+    gte(orders.createdAt, from),
+    lt(orders.createdAt, to),
+    notInArray(orders.status, [...NOT_SALES]),
+  )
   const tz = RESTAURANT.timeZone
 
   const [[totals], byHour, topItems, byMethod] = await Promise.all([
@@ -47,7 +51,11 @@ export async function salesForDay(exec: Executor, date: string) {
       .orderBy(desc(sql`2`))
       .limit(5),
     exec
-      .select({ method: orders.paymentMethod, orders: count(), revenuePaise: sum(orders.totalPaise).mapWith(Number) })
+      .select({
+        method: orders.paymentMethod,
+        orders: count(),
+        revenuePaise: sum(orders.totalPaise).mapWith(Number),
+      })
       .from(orders)
       .where(sold)
       .groupBy(orders.paymentMethod),

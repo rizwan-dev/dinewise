@@ -63,6 +63,9 @@ export class RazorpayGateway implements PaymentGateway {
   }
 
   refund(paymentId: string, amountPaise: number) {
-    return this.call<{ id: string }>(`/payments/${paymentId}/refund`, { amount: amountPaise, speed: 'normal' })
+    return this.call<{ id: string }>(`/payments/${paymentId}/refund`, {
+      amount: amountPaise,
+      speed: 'normal',
+    })
   }
 }

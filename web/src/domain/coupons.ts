@@ -47,8 +47,7 @@ export function evaluateCoupon(
     )
   }
 
-  const raw =
-    coupon.kind === 'PERCENT' ? percentOf(ctx.subtotalPaise, coupon.value) : coupon.value
+  const raw = coupon.kind === 'PERCENT' ? percentOf(ctx.subtotalPaise, coupon.value) : coupon.value
   const capped = coupon.maxDiscountPaise === null ? raw : Math.min(raw, coupon.maxDiscountPaise)
   // A discount never makes the food free or negative.
   return Math.min(capped, ctx.subtotalPaise)

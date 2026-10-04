@@ -53,7 +53,9 @@ export class FakeGateway implements PaymentGateway {
 
 export function settle<T>(promises: Promise<T>[]) {
   return Promise.allSettled(promises).then((results) => ({
-    ok: results.filter((r): r is PromiseFulfilledResult<T> => r.status === 'fulfilled').map((r) => r.value),
+    ok: results
+      .filter((r): r is PromiseFulfilledResult<Awaited<T>> => r.status === 'fulfilled')
+      .map((r) => r.value),
     failed: results
       .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
       .map((r) => r.reason as { code?: string; message: string }),

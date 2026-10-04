@@ -50,7 +50,12 @@ async function issueCode(exec: Executor, secret: string, now: Date, phone: strin
   const [{ value: recentForPhone = 0 } = {}] = await exec
     .select({ value: count() })
     .from(otpChallenges)
-    .where(and(eq(otpChallenges.phone, phone), gt(otpChallenges.createdAt, new Date(now.getTime() - PER_PHONE.windowMs))))
+    .where(
+      and(
+        eq(otpChallenges.phone, phone),
+        gt(otpChallenges.createdAt, new Date(now.getTime() - PER_PHONE.windowMs)),
+      ),
+    )
   if (recentForPhone >= PER_PHONE.limit) {
     throw new AppError('TOO_MANY_CODES', 'Too many codes sent to this number. Please wait 10 minutes.')
   }
@@ -58,7 +63,12 @@ async function issueCode(exec: Executor, secret: string, now: Date, phone: strin
     const [{ value: recentForIp = 0 } = {}] = await exec
       .select({ value: count() })
       .from(otpChallenges)
-      .where(and(eq(otpChallenges.requestIp, ip), gt(otpChallenges.createdAt, new Date(now.getTime() - PER_IP.windowMs))))
+      .where(
+        and(
+          eq(otpChallenges.requestIp, ip),
+          gt(otpChallenges.createdAt, new Date(now.getTime() - PER_IP.windowMs)),
+        ),
+      )
     if (recentForIp >= PER_IP.limit) {
       throw new AppError('TOO_MANY_CODES', 'Too many sign-in attempts from this network. Please try later.')
     }
@@ -118,7 +128,9 @@ export async function verifyCode(
     const left = OTP_MAX_ATTEMPTS - challenge.attempts
     throw new AppError(
       'WRONG_CODE',
-      left > 0 ? `That code is not right. ${left} ${left === 1 ? 'try' : 'tries'} left.` : 'That code is not right. Ask for a new one.',
+      left > 0
+        ? `That code is not right. ${left} ${left === 1 ? 'try' : 'tries'} left.`
+        : 'That code is not right. Ask for a new one.',
       'code',
     )
   }
@@ -129,7 +141,8 @@ export async function verifyCode(
     .set({ consumedAt: now })
     .where(and(eq(otpChallenges.id, challenge.id), isNull(otpChallenges.consumedAt)))
     .returning({ id: otpChallenges.id })
-  if (!consumed) throw new AppError('CODE_EXPIRED', 'That code has already been used. Ask for a new one.', 'code')
+  if (!consumed)
+    throw new AppError('CODE_EXPIRED', 'That code has already been used. Ask for a new one.', 'code')
 
   const [created] = await exec
     .insert(customers)

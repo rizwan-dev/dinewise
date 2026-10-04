@@ -42,7 +42,9 @@ describe('sign-in by one-time code', () => {
   it('expires after five minutes', async () => {
     const phone = await requestCode(deps(), '9822011002', null)
     const code = await codeSentTo(phone)
-    await expect(verifyCode(deps(new Date(NOW.getTime() + 5 * 60_000 + 1)), phone, code)).rejects.toMatchObject({
+    await expect(
+      verifyCode(deps(new Date(NOW.getTime() + 5 * 60_000 + 1)), phone, code),
+    ).rejects.toMatchObject({
       code: 'CODE_EXPIRED',
     })
   })
@@ -68,18 +70,23 @@ describe('sign-in by one-time code', () => {
   })
 
   it('sends at most three codes to a phone in ten minutes, even when asked in parallel', async () => {
-    const { ok, failed } = await settle(Array.from({ length: 6 }, () => requestCode(deps(), '9822011002', null)))
+    const { ok, failed } = await settle(
+      Array.from({ length: 6 }, () => requestCode(deps(), '9822011002', null)),
+    )
     expect(ok).toHaveLength(3)
     expect(failed.every((f) => f.code === 'TOO_MANY_CODES')).toBe(true)
 
-    await expect(requestCode(deps(new Date(NOW.getTime() + 10 * 60_000 + 1)), '9822011002', null)).resolves.toBe(
-      '+919822011002',
-    )
+    await expect(
+      requestCode(deps(new Date(NOW.getTime() + 10 * 60_000 + 1)), '9822011002', null),
+    ).resolves.toBe('+919822011002')
   })
 
   it('limits codes from one network address across many phones', async () => {
-    for (let i = 0; i < 10; i++) await requestCode(deps(), `98220110${String(i).padStart(2, '0')}`, '203.0.113.9')
-    await expect(requestCode(deps(), '9822011099', '203.0.113.9')).rejects.toMatchObject({ code: 'TOO_MANY_CODES' })
+    for (let i = 0; i < 10; i++)
+      await requestCode(deps(), `98220110${String(i).padStart(2, '0')}`, '203.0.113.9')
+    await expect(requestCode(deps(), '9822011099', '203.0.113.9')).rejects.toMatchObject({
+      code: 'TOO_MANY_CODES',
+    })
   })
 
   it('only the newest code works', async () => {

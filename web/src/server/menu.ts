@@ -24,13 +24,25 @@ export async function loadMenu(exec: Executor): Promise<MenuSection[]> {
   const ids = items.map((i) => i.id)
   const [variants, groups] = ids.length
     ? await Promise.all([
-        exec.select().from(itemVariants).where(inArray(itemVariants.itemId, ids)).orderBy(asc(itemVariants.position), asc(itemVariants.id)),
-        exec.select().from(addonGroups).where(inArray(addonGroups.itemId, ids)).orderBy(asc(addonGroups.position), asc(addonGroups.id)),
+        exec
+          .select()
+          .from(itemVariants)
+          .where(inArray(itemVariants.itemId, ids))
+          .orderBy(asc(itemVariants.position), asc(itemVariants.id)),
+        exec
+          .select()
+          .from(addonGroups)
+          .where(inArray(addonGroups.itemId, ids))
+          .orderBy(asc(addonGroups.position), asc(addonGroups.id)),
       ])
     : [[], []]
   const groupIds = groups.map((g) => g.id)
   const options = groupIds.length
-    ? await exec.select().from(addons).where(inArray(addons.groupId, groupIds)).orderBy(asc(addons.position), asc(addons.id))
+    ? await exec
+        .select()
+        .from(addons)
+        .where(inArray(addons.groupId, groupIds))
+        .orderBy(asc(addons.position), asc(addons.id))
     : []
 
   const entries: MenuEntry[] = items.map((i) => ({
@@ -62,7 +74,12 @@ export async function loadMenu(exec: Executor): Promise<MenuSection[]> {
   }))
 
   return cats
-    .map((c) => ({ id: c.id, name: c.name, slug: c.slug, items: entries.filter((e) => e.categoryId === c.id) }))
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      items: entries.filter((e) => e.categoryId === c.id),
+    }))
     .filter((s) => s.items.length > 0)
 }
 

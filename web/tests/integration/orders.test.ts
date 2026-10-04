@@ -25,7 +25,12 @@ describe('placing an order', () => {
     })
     expect(order!.code).toMatch(/^TL-[2-9A-HJ-NP-Z]{6}$/)
     expect(order!.items).toEqual([
-      expect.objectContaining({ name: 'Paneer Tikka', quantity: 2, unitPricePaise: 280_00, lineTotalPaise: 560_00 }),
+      expect.objectContaining({
+        name: 'Paneer Tikka',
+        quantity: 2,
+        unitPricePaise: 280_00,
+        lineTotalPaise: 560_00,
+      }),
     ])
     expect(order!.events.map((e) => e.status)).toEqual(['PLACED'])
   })
@@ -37,16 +42,23 @@ describe('placing an order', () => {
     expect((await orderDetails(db, { code: placed.code }))!.deliveryFeePaise).toBe(30_00)
 
     await expect(
-      placeOrder(deps, await pickupOrder(priya, { fulfilment: 'DELIVERY', address: { ...address, pincode: '400001' } })),
+      placeOrder(
+        deps,
+        await pickupOrder(priya, { fulfilment: 'DELIVERY', address: { ...address, pincode: '400001' } }),
+      ),
     ).rejects.toMatchObject({ code: 'NO_DELIVERY' })
   })
 
   it('never lets one kitchen slot take more than eight orders, however many arrive at once', async () => {
     const slot = localInstant('2026-10-05', '20:00').toISOString()
     const people = await Promise.all(
-      Array.from({ length: 12 }, (_, i) => customer(`+9198220110${String(i).padStart(2, '0')}`, `Guest ${i}`)),
+      Array.from({ length: 12 }, (_, i) =>
+        customer(`+9198220110${String(i).padStart(2, '0')}`, `Guest ${i}`),
+      ),
     )
-    const { ok, failed } = await settle(people.map(async (p) => placeOrder(deps, await pickupOrder(p, { slot }))))
+    const { ok, failed } = await settle(
+      people.map(async (p) => placeOrder(deps, await pickupOrder(p, { slot }))),
+    )
 
     expect(ok).toHaveLength(8)
     expect(failed.map((f) => f.code)).toEqual(Array(4).fill('SLOT_FULL'))
@@ -54,7 +66,9 @@ describe('placing an order', () => {
 
   it('moves "as soon as possible" orders on to the next slot when one fills up', async () => {
     const people = await Promise.all(
-      Array.from({ length: 10 }, (_, i) => customer(`+9198220120${String(i).padStart(2, '0')}`, `Guest ${i}`)),
+      Array.from({ length: 10 }, (_, i) =>
+        customer(`+9198220120${String(i).padStart(2, '0')}`, `Guest ${i}`),
+      ),
     )
     const { ok } = await settle(people.map(async (p) => placeOrder(deps, await pickupOrder(p))))
     expect(ok).toHaveLength(10)
@@ -68,7 +82,9 @@ describe('placing an order', () => {
   it('redeems a one-per-customer coupon once, even when the button is tapped five times', async () => {
     const priya = await customer()
     const { ok, failed } = await settle(
-      Array.from({ length: 5 }, async () => placeOrder(deps, await pickupOrder(priya, { couponCode: 'welcome50' }))),
+      Array.from({ length: 5 }, async () =>
+        placeOrder(deps, await pickupOrder(priya, { couponCode: 'welcome50' })),
+      ),
     )
     expect(ok).toHaveLength(1)
     expect(failed.every((f) => f.code === 'FIRST_ORDER_ONLY' || f.code === 'USED_UP')).toBe(true)
@@ -79,7 +95,9 @@ describe('placing an order', () => {
 
   it('explains an unknown coupon instead of silently ignoring it', async () => {
     const priya = await customer()
-    await expect(placeOrder(deps, await pickupOrder(priya, { couponCode: 'FREEFOOD' }))).rejects.toMatchObject({
+    await expect(
+      placeOrder(deps, await pickupOrder(priya, { couponCode: 'FREEFOOD' })),
+    ).rejects.toMatchObject({
       code: 'COUPON_NOT_FOUND',
       message: 'FREEFOOD is not a valid code.',
     })
@@ -98,13 +116,22 @@ describe('the database as the last line of defence', () => {
   it('refuses a bill that does not add up, whoever writes it', async () => {
     const priya = await customer()
     const placed = await placeOrder(deps, await pickupOrder(priya))
-    expect(await constraintViolated(db.update(orders).set({ totalPaise: 1 }).where(eq(orders.code, placed.code)))).toBe('orders_total_adds_up')
+    expect(
+      await constraintViolated(db.update(orders).set({ totalPaise: 1 }).where(eq(orders.code, placed.code))),
+    ).toBe('orders_total_adds_up')
   })
 
   it('refuses an online order reaching the kitchen unpaid', async () => {
     const priya = await customer()
     const placed = await placeOrder(deps, await pickupOrder(priya))
-    expect(await constraintViolated(db.update(orders).set({ paymentMethod: 'ONLINE', paymentStatus: 'PENDING' }).where(eq(orders.code, placed.code)))).toBe('orders_online_paid_before_kitchen')
+    expect(
+      await constraintViolated(
+        db
+          .update(orders)
+          .set({ paymentMethod: 'ONLINE', paymentStatus: 'PENDING' })
+          .where(eq(orders.code, placed.code)),
+      ),
+    ).toBe('orders_online_paid_before_kitchen')
   })
 })
 
@@ -130,7 +157,9 @@ describe('moving an order along', () => {
     await move(db, { orderId: first.id, to: 'PREPARING', actor: 'KITCHEN' })
     await expect(
       move(db, { orderId: first.id, to: 'CANCELLED', actor: 'CUSTOMER', customerId: priya.id }),
-    ).rejects.toMatchObject({ message: 'The kitchen has started on this order, so it can no longer be cancelled.' })
+    ).rejects.toMatchObject({
+      message: 'The kitchen has started on this order, so it can no longer be cancelled.',
+    })
   })
 
   it('needs a reason to reject, which the customer then sees', async () => {

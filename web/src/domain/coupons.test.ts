@@ -13,7 +13,12 @@ const base: Coupon = {
   firstOrderOnly: false,
   perCustomerLimit: null,
 }
-const ctx = { subtotalPaise: 400_00, now: new Date('2026-10-05T12:00:00Z'), isFirstOrder: false, customerUses: 0 }
+const ctx = {
+  subtotalPaise: 400_00,
+  now: new Date('2026-10-05T12:00:00Z'),
+  isFirstOrder: false,
+  customerUses: 0,
+}
 
 describe('coupons', () => {
   it('gives a flat amount off', () => {

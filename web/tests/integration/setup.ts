@@ -1,14 +1,14 @@
 import { sql } from 'drizzle-orm'
 import { Pool } from 'pg'
 import { afterAll, beforeEach, inject } from 'vitest'
-import { useDb } from '../../src/db/client'
+import { setDb } from '../../src/db/client'
 import { seedDemo } from '../../src/server/seed'
 
 const url = inject('databaseUrl')
 process.env.DATABASE_URL = url
 
 const pool = new Pool({ connectionString: url, max: 30 })
-export const db = useDb(pool)
+export const db = setDb(pool)
 
 /** Every test starts from the demo restaurant and nothing else. */
 beforeEach(async () => {

@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc", "jsx-a11y", "nextjs"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "jsx-a11y/no-autofocus": "off",
+    "typescript/no-explicit-any": "error"
+  },
+  "ignorePatterns": ["drizzle/meta", ".next"],
+  "overrides": [
+    {
+      "files": ["src/app/**/page.tsx", "src/app/**/layout.tsx"],
+      "rules": {
+        "react/purity": "off"
+      }
+    }
+  ]
+}

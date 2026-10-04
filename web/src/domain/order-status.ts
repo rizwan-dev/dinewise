@@ -44,9 +44,7 @@ const FLOW: Record<OrderStatus, (fulfilment: Fulfilment) => Transition[]> = {
     { to: 'REJECTED', by: ['KITCHEN'] },
   ],
   READY: (f) =>
-    f === 'DELIVERY'
-      ? [{ to: 'OUT_FOR_DELIVERY', by: ['KITCHEN'] }]
-      : [{ to: 'COLLECTED', by: ['KITCHEN'] }],
+    f === 'DELIVERY' ? [{ to: 'OUT_FOR_DELIVERY', by: ['KITCHEN'] }] : [{ to: 'COLLECTED', by: ['KITCHEN'] }],
   OUT_FOR_DELIVERY: () => [{ to: 'DELIVERED', by: ['KITCHEN'] }],
   DELIVERED: () => [],
   COLLECTED: () => [],
