@@ -25,7 +25,11 @@ const JOURNEY = [
 
 export default async function HomePage() {
   const now = new Date()
-  const [menu, counts, offers] = await Promise.all([loadMenu(db()), slotCounts(db(), now), activeOffers(db(), now)])
+  const [menu, counts, offers] = await Promise.all([
+    loadMenu(db()),
+    slotCounts(db(), now),
+    activeOffers(db(), now),
+  ])
   const all = menu.flatMap((s) => s.items).filter((i) => i.available)
   const bestsellers = all.filter((i) => i.bestseller).slice(0, 8)
   const combos = menu.find((s) => s.slug === 'combos-and-thalis')?.items.filter((i) => i.available) ?? []
@@ -133,7 +137,7 @@ export default async function HomePage() {
               See all →
             </Link>
           </div>
-          <ul className="-mx-4 flex scrollbar-none snap-x gap-3 overflow-x-auto px-4 pb-1">
+          <ul className="-mx-4 flex snap-x scrollbar-none gap-3 overflow-x-auto px-4 pb-1">
             {combos.map((item) => (
               <li key={item.id} className="w-72 shrink-0 snap-start">
                 <Link

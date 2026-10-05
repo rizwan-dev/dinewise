@@ -103,7 +103,9 @@ export default async function TodayPage() {
                     />
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold">{item.name}</span>
                     <span className="text-sm text-stone-500 tabular-nums">× {item.quantity}</span>
-                    <span className="w-20 text-right text-sm tabular-nums">{formatPaise(item.revenuePaise)}</span>
+                    <span className="w-20 text-right text-sm tabular-nums">
+                      {formatPaise(item.revenuePaise)}
+                    </span>
                   </li>
                 )
               })}

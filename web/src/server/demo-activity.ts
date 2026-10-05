@@ -77,7 +77,12 @@ async function demoCustomers(db: Db): Promise<Customer[]> {
   const rows = await db
     .select()
     .from(customers)
-    .where(inArray(customers.phone, DEMO_CUSTOMERS.map(([, phone]) => phone)))
+    .where(
+      inArray(
+        customers.phone,
+        DEMO_CUSTOMERS.map(([, phone]) => phone),
+      ),
+    )
   return rows.map((r) => ({
     id: r.id,
     name: r.name ?? 'Guest',
@@ -172,7 +177,13 @@ async function placeDemoOrder(
 }
 
 /** Moves an order through the kitchen's steps, stopping once it reaches `until` or the clock. */
-async function advance(db: Db, order: { id: number; fulfilment: Fulfilment }, at: Date, until: OrderStatus, now: Date) {
+async function advance(
+  db: Db,
+  order: { id: number; fulfilment: Fulfilment },
+  at: Date,
+  until: OrderStatus,
+  now: Date,
+) {
   for (const [status, after] of steps(order.fulfilment)) {
     const when = minutes(at, after)
     if (when > now) return
@@ -198,7 +209,10 @@ function rushTimes(rng: Rng, date: string, howMany: number, before: Date): Date[
  * Fills a fresh demo with a week of finished orders and the next two days' bookings.
  * Does nothing if finished orders already exist, so calling it on every start is safe.
  */
-export async function seedDemoActivity(db: Db, now = new Date()): Promise<{ orders: number; bookings: number }> {
+export async function seedDemoActivity(
+  db: Db,
+  now = new Date(),
+): Promise<{ orders: number; bookings: number }> {
   // One instance seeds; others starting at the same moment skip. The lock is session-level, so
   // it needs a direct connection: a transaction pooler could run unlock on another session.
   const client = new Client({ connectionString: directDatabaseUrl() })
@@ -266,7 +280,10 @@ async function seed(db: Db, now: Date) {
           customerId: guest.id,
           startsAt: pick(rng, times).start.toISOString(),
           partySize,
-          notes: rng() < 0.3 ? pick(rng, ['Birthday dinner', 'Window seat if possible', 'High chair needed']) : null,
+          notes:
+            rng() < 0.3
+              ? pick(rng, ['Birthday dinner', 'Window seat if possible', 'High chair needed'])
+              : null,
         },
         now,
       )
@@ -308,7 +325,15 @@ export async function topUpDemoKitchen(db: Db, now = new Date(), { force = false
       await db
         .select({ status: orders.status, n: count() })
         .from(orders)
-        .where(and(inArray(orders.status, LIVE.map(([s]) => s)), gt(orders.createdAt, minutes(now, -120))))
+        .where(
+          and(
+            inArray(
+              orders.status,
+              LIVE.map(([s]) => s),
+            ),
+            gt(orders.createdAt, minutes(now, -120)),
+          ),
+        )
         .groupBy(orders.status)
     ).map((r) => [r.status, r.n]),
   )

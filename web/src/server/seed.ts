@@ -91,7 +91,8 @@ const MENU: { name: string; items: SeedItem[] }[] = [
       },
       {
         name: 'Tandoori Chicken',
-        description: 'Bone-in chicken marinated overnight in yoghurt and Kashmiri chilli, roasted in the tandoor.',
+        description:
+          'Bone-in chicken marinated overnight in yoghurt and Kashmiri chilli, roasted in the tandoor.',
         veg: false,
         spice: 2,
         bestseller: true,
@@ -255,7 +256,8 @@ const MENU: { name: string; items: SeedItem[] }[] = [
       },
       {
         name: 'Aloo Paratha',
-        description: 'Two whole-wheat parathas stuffed with spiced potato, with white butter, curd and pickle.',
+        description:
+          'Two whole-wheat parathas stuffed with spiced potato, with white butter, curd and pickle.',
         price: 170,
         veg: true,
       },

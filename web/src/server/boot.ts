@@ -21,7 +21,8 @@ export async function boot() {
       console.log('Demo restaurant created: manager@tadkalane.example and kitchen@tadkalane.example')
     }
     const activity = await seedDemoActivity(db())
-    if (activity.orders) console.log(`Demo week created: ${activity.orders} orders, ${activity.bookings} bookings`)
+    if (activity.orders)
+      console.log(`Demo week created: ${activity.orders} orders, ${activity.bookings} bookings`)
   }
   if (serverless()) return
 
