@@ -12,11 +12,12 @@ the database.
 
 **Next.js 16 · React 19 · TypeScript · PostgreSQL · Drizzle · Tailwind · Razorpay · Docker · Playwright**
 
-**Try it: [dinewise-web.vercel.app](https://dinewise-web.vercel.app)**. Sign in with any Indian
-mobile number (the code is shown on screen). The kitchen is at
-[`/staff`](https://dinewise-web.vercel.app/staff): `kitchen@tadkalane.example` or
-`manager@tadkalane.example`, password `tadka-demo-2026`. Payments are Razorpay test mode, so no
-real money moves, and the demo resets every night.
+**Try it: [dinewise.riztechacademy.com](https://dinewise.riztechacademy.com)**. Sign in with any
+Indian mobile number (the code is shown on screen). To see the restaurant's side, open
+[`/staff`](https://dinewise.riztechacademy.com/staff) and tap **Try as kitchen** or **Try as
+manager**, or sign in as `kitchen@tadkalane.example` or `manager@tadkalane.example`, password
+`tadka-demo-2026`. Payments are Razorpay test mode, so no real money moves. The demo resets every
+night to a busy day: a week of past orders, today's bookings and tickets on the kitchen screen.
 
 <p>
   <img src="docs/screenshots/phone-home.png" width="24%" alt="Home page on a phone">
@@ -92,8 +93,26 @@ Most customers order from a mid-range Android phone, often on mobile data:
 For staff, the [kitchen screen](<web/src/app/staff/(console)/kitchen-board.tsx>) is built for a
 tablet on the counter: one large button for the next step, a chime for new orders, late orders
 in red, and the cash to collect on each ticket. Marking a dish sold out takes it off sale at
-once. Managers also edit dishes and upload photos (re-encoded to WebP, which strips location
-data from phone cameras), run the day's bookings and see the day's sales.
+once. Managers start on a **Today** dashboard (sales so far, the kitchen's live columns, best
+sellers, the next tables and the last seven days), edit dishes and upload photos (re-encoded to
+WebP, which strips location data from phone cameras), run the day's bookings and see the day's
+sales.
+
+## How an order is processed
+
+1. **The customer orders.** The ticket lands in the kitchen's **New** column with a chime. Online
+   orders appear only once Razorpay confirms the payment; cash orders show the amount to collect.
+2. **The kitchen taps "Start cooking".** The ticket moves to **Cooking** and the customer's order
+   page changes to "Being prepared". The kitchen can instead **Reject** with a reason; the
+   customer sees why, and a paid order is refunded automatically.
+3. **"Mark ready"** moves it to **Ready**.
+4. **Delivery:** "Out for delivery", then "Delivered". **Pickup:** "Collected". Late orders turn
+   red.
+
+The allowed moves, and who may make each one, live in one state machine
+([`order-status.ts`](web/src/domain/order-status.ts)). The demo's seeded orders go through the
+same services as real ones ([`demo-activity.ts`](web/src/server/demo-activity.ts)), so they obey
+the same slot capacity, pricing and status rules.
 
 ## Architecture
 
@@ -189,35 +208,50 @@ and schedules the daily job. What changes on serverless hosting, and why:
 ## Photo credits
 
 Free photos from [Pexels](https://www.pexels.com/license/), resized for the demo. Hara Bhara
-Kebab and Gajar Halwa use an illustration because no honest match was available.
+Kebab and Malai Kofta use an illustration because no honest match was available.
 
 | Dish                 | Photo                                            |
 | -------------------- | ------------------------------------------------ |
+| Aloo Paratha         | [Pexels](https://www.pexels.com/photo/33428723/) |
 | Amritsari Fish       | [Pexels](https://www.pexels.com/photo/20258816/) |
+| Biryani Combo        | [Pexels](https://www.pexels.com/photo/12737817/) |
 | Butter Chicken       | [Pexels](https://www.pexels.com/photo/37295815/) |
+| Butter Chicken Combo | [Pexels](https://www.pexels.com/photo/10615283/) |
 | Butter Naan          | [Pexels](https://www.pexels.com/photo/12737662/) |
 | Chicken Dum Biryani  | [Pexels](https://www.pexels.com/photo/4224304/)  |
 | Chicken Tikka        | [Pexels](https://www.pexels.com/photo/6522616/)  |
+| Chole Bhature        | [Pexels](https://www.pexels.com/photo/36388454/) |
+| Cold Coffee          | [Pexels](https://www.pexels.com/photo/4869290/)  |
 | Dal Khichdi          | [Pexels](https://www.pexels.com/photo/6363498/)  |
 | Dal Makhani          | [Pexels](https://www.pexels.com/photo/37182514/) |
+| Egg Curry            | [Pexels](https://www.pexels.com/photo/35066815/) |
 | Fresh Lime Soda      | [Pexels](https://www.pexels.com/photo/36268523/) |
+| Gajar Halwa          | [Pexels](https://www.pexels.com/photo/20446403/) |
 | Garlic Naan          | [Pexels](https://www.pexels.com/photo/16851842/) |
 | Gulab Jamun          | [Pexels](https://www.pexels.com/photo/7406887/)  |
 | Home page spread     | [Pexels](https://www.pexels.com/photo/9792458/)  |
 | Jeera Rice           | [Pexels](https://www.pexels.com/photo/28674713/) |
 | Kadai Mushroom       | [Pexels](https://www.pexels.com/photo/35041660/) |
+| Kulfi                | [Pexels](https://www.pexels.com/photo/39831472/) |
 | Laccha Paratha       | [Pexels](https://www.pexels.com/photo/39833390/) |
+| Mango Lassi          | [Pexels](https://www.pexels.com/photo/14509267/) |
 | Masala Chaas         | [Pexels](https://www.pexels.com/photo/8489749/)  |
 | Masala Chai          | [Pexels](https://www.pexels.com/photo/20270270/) |
 | Masala Papad         | [Pexels](https://www.pexels.com/photo/34347890/) |
 | Mutton Rogan Josh    | [Pexels](https://www.pexels.com/photo/9609846/)  |
+| Palak Paneer         | [Pexels](https://www.pexels.com/photo/17200452/) |
 | Paneer Butter Masala | [Pexels](https://www.pexels.com/photo/11115801/) |
+| Paneer Combo         | [Pexels](https://www.pexels.com/photo/5127316/)  |
 | Paneer Tikka         | [Pexels](https://www.pexels.com/photo/33430556/) |
+| Pav Bhaji            | [Pexels](https://www.pexels.com/photo/5410400/)  |
+| Rajma Chawal         | [Pexels](https://www.pexels.com/photo/12737912/) |
 | Rasmalai             | [Pexels](https://www.pexels.com/photo/39973385/) |
 | Sweet Lassi          | [Pexels](https://www.pexels.com/photo/8917283/)  |
 | Tadka Lane Thali     | [Pexels](https://www.pexels.com/photo/36885763/) |
+| Tandoori Chicken     | [Pexels](https://www.pexels.com/photo/20371522/) |
 | Tandoori Roti        | [Pexels](https://www.pexels.com/photo/12737800/) |
 | Veg Dum Biryani      | [Pexels](https://www.pexels.com/photo/9738983/)  |
+| Veg Samosa           | [Pexels](https://www.pexels.com/photo/9027521/)  |
 
 ## Licence
 
