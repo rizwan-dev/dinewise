@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'node:crypto'
 import { db } from '@/db/client'
+import { seedDemoActivity } from '@/server/demo-activity'
 import { env } from '@/server/env'
 import { housekeep } from '@/server/housekeeping'
 import { resetDemo } from '@/server/seed'
@@ -18,7 +19,10 @@ export async function GET(request: Request) {
 
   await housekeep()
   const reset = e.DEMO_SEED && e.DEMO_DAILY_RESET
-  if (reset) await resetDemo(db(), e.DEMO_STAFF_PASSWORD!)
+  if (reset) {
+    await resetDemo(db(), e.DEMO_STAFF_PASSWORD!)
+    await seedDemoActivity(db())
+  }
   return Response.json({ ok: true, reset })
 }
 

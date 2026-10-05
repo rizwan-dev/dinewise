@@ -5,12 +5,12 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { db } from '@/db/client'
-import { menuItems } from '@/db/schema'
+import { menuItems, staff } from '@/db/schema'
 import { parseRupees } from '@/domain/money'
 import { ORDER_STATUSES } from '@/domain/order-status'
 import { endSession, requireStaff, startSession } from '@/server/auth/current'
 import { authenticateStaff } from '@/server/auth/staff'
-import { serverless } from '@/server/env'
+import { env, serverless } from '@/server/env'
 import { type ActionResult, AppError, toResult } from '@/server/errors'
 import { setAvailability } from '@/server/menu'
 import { move } from '@/server/orders'
@@ -25,6 +25,22 @@ export async function staffSignInAction(input: { email: string; password: string
   })
   if (!result.ok) return result
   redirect('/staff')
+}
+
+/**
+ * One tap into the demo restaurant as its kitchen or its manager, so visitors can see the staff
+ * side without typing the demo password. Refused unless this installation is the demo.
+ */
+export async function demoStaffSignInAction(role: 'KITCHEN' | 'MANAGER'): Promise<ActionResult> {
+  const result = await toResult(async () => {
+    if (!env().DEMO_SEED) throw new AppError('NOT_DEMO', 'Demo sign-in is only available in the demo.')
+    const email = role === 'MANAGER' ? 'manager@tadkalane.example' : 'kitchen@tadkalane.example'
+    const [member] = await db().select({ id: staff.id }).from(staff).where(eq(staff.email, email))
+    if (!member) throw new AppError('NOT_FOUND', 'The demo staff accounts are not set up yet.')
+    await startSession('STAFF', member.id)
+  })
+  if (!result.ok) return result
+  redirect(role === 'MANAGER' ? '/staff/today' : '/staff')
 }
 
 export async function staffSignOutAction() {
