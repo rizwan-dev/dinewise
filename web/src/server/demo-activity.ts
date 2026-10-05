@@ -1,12 +1,11 @@
 import 'server-only'
-import { and, count, gt, inArray } from 'drizzle-orm'
+import { and, count, eq, gte, inArray } from 'drizzle-orm'
 import { Client } from 'pg'
 import { RESTAURANT } from '@/config/restaurant'
 import { type Db, directDatabaseUrl } from '@/db/client'
 import { type AddressSnapshot, customers, orders } from '@/db/schema'
 import type { OrderStatus } from '@/domain/order-status'
 import type { CartLine, Fulfilment } from '@/domain/pricing'
-import { isOpenNow } from '@/domain/slots'
 import { addDays, localDate, localInstant } from '@/domain/time'
 import { type MenuEntry, loadMenu } from './menu'
 import { markPaid, move, placeOrder } from './orders'
@@ -15,11 +14,13 @@ import { availableTimes, book } from './reservations'
 
 /**
  * A believable restaurant day for the public demo: a week of past orders for the sales screen,
- * today's bookings, and tickets in every column of the kitchen screen.
+ * today's bookings, and tickets in every column of the kitchen screen at any hour.
  *
  * Every order goes through the real services (placeOrder, markPaid, move) at the time it would
- * have happened, so the demo obeys the same rules as real orders: kitchen-slot capacity, pricing,
- * the order state machine and the database's own checks. Only ever called when DEMO_SEED=true.
+ * have happened, so the demo obeys the same rules as real orders: pricing, the order state
+ * machine and the database's own checks. The week of past orders also takes kitchen slots like
+ * any order; the live kitchen tickets are marked as demo tickets and take none (see
+ * topUpDemoKitchen). Only ever called when DEMO_SEED=true.
  */
 
 const DEMO_CUSTOMERS: [string, string, string][] = [
@@ -118,17 +119,17 @@ function basket(rng: Rng, menu: MenuEntry[]): CartLine[] {
 
 const minutes = (at: Date, m: number) => new Date(at.getTime() + m * 60_000)
 
-/** The kitchen's steps after an order is placed, with when each one happened. */
+/** The kitchen's steps after an order is placed, with how many minutes after it each one happens. */
 function steps(fulfilment: Fulfilment): [OrderStatus, number][] {
   return fulfilment === 'DELIVERY'
     ? [
-        ['PREPARING', 4],
+        ['PREPARING', 5],
         ['READY', 22],
         ['OUT_FOR_DELIVERY', 26],
         ['DELIVERED', 48],
       ]
     : [
-        ['PREPARING', 3],
+        ['PREPARING', 5],
         ['READY', 20],
         ['COLLECTED', 34],
       ]
@@ -140,7 +141,7 @@ async function placeDemoOrder(
   menu: MenuEntry[],
   customer: Customer,
   at: Date,
-  options: { online: boolean; delivery: boolean },
+  options: { online: boolean; delivery: boolean; dueAt?: Date; now?: Date },
 ) {
   const fulfilment: Fulfilment = options.delivery ? 'DELIVERY' : 'PICKUP'
   const address: AddressSnapshot | null = options.delivery
@@ -165,26 +166,33 @@ async function placeDemoOrder(
       paymentMethod: options.online ? 'ONLINE' : 'ON_DELIVERY',
       notes: rng() < 0.15 ? pick(rng, ['Less spicy please', 'Extra onions', 'Ring the bell twice']) : null,
     },
+    { demoDueAt: options.dueAt },
   )
   if (placed.payment) {
+    const paidAt = minutes(at, 1)
     await markPaid(
-      { db, gateway: DEMO_GATEWAY, now: minutes(at, 1) },
+      { db, gateway: DEMO_GATEWAY, now: options.now && options.now < paidAt ? options.now : paidAt },
       placed.payment.providerOrderId,
       `pay_demo_${placed.code}`,
     )
   }
-  return { id: placed.id, fulfilment }
+  return { id: placed.id, fulfilment, status: 'PLACED' as OrderStatus }
 }
 
-/** Moves an order through the kitchen's steps, stopping once it reaches `until` or the clock. */
+/**
+ * Moves an order on through the kitchen's steps that were due by `now`, counted from `at`, when
+ * it was placed. Stops at `until` if given.
+ */
 async function advance(
   db: Db,
-  order: { id: number; fulfilment: Fulfilment },
+  order: { id: number; fulfilment: Fulfilment; status: OrderStatus },
   at: Date,
-  until: OrderStatus,
   now: Date,
+  until?: OrderStatus,
 ) {
-  for (const [status, after] of steps(order.fulfilment)) {
+  const path = steps(order.fulfilment)
+  const done = path.findIndex(([status]) => status === order.status)
+  for (const [status, after] of path.slice(done + 1)) {
     const when = minutes(at, after)
     if (when > now) return
     await move(db, { orderId: order.id, to: status, actor: 'KITCHEN', now: when })
@@ -259,7 +267,7 @@ async function seed(db: Db, now: Date) {
       if (roll < 0.05) {
         await move(db, { orderId: order.id, to: 'CANCELLED', actor: 'CUSTOMER', now: minutes(at, 2) })
       } else {
-        await advance(db, order, at, order.fulfilment === 'DELIVERY' ? 'DELIVERED' : 'COLLECTED', now)
+        await advance(db, order, at, now)
       }
     }
   }
@@ -295,60 +303,85 @@ async function seed(db: Db, now: Date) {
   return { orders: placed, bookings }
 }
 
-/** How many tickets the demo kitchen keeps in each column while the restaurant is open. */
-const LIVE: [OrderStatus, number, number][] = [
-  // status, how many, placed this many minutes ago
-  ['PLACED', 2, 2],
-  ['PREPARING', 2, 10],
-  ['READY', 1, 24],
-  ['OUT_FOR_DELIVERY', 1, 32],
-]
+/**
+ * The demo kitchen's stream of orders: one arrives every few minutes, at any hour, so a visitor
+ * always finds a working kitchen. Each one is a function of its arrival time (its basket, how it
+ * is paid, pickup or delivery), so every instance agrees on what the stream holds.
+ */
+const ARRIVAL_EVERY_MINUTES = 4
+/** Long enough for the slowest order, a delivery, to have left the board again. */
+const STREAM_WINDOW_MINUTES = 50
+/** Ready this long after it is placed, the restaurant's own preparation time. */
+const DUE_AFTER_MINUTES = 35
+
+function arrivals(now: Date): Date[] {
+  const every = ARRIVAL_EVERY_MINUTES * 60_000
+  const latest = Math.floor(now.getTime() / every) * every
+  const times: Date[] = []
+  for (let t = latest; t > now.getTime() - STREAM_WINDOW_MINUTES * 60_000; t -= every) {
+    times.push(new Date(t))
+  }
+  return times.reverse()
+}
 
 const globalForDemo = globalThis as unknown as { dinewiseDemoTopUp?: number }
 
 /**
- * Keeps the demo kitchen busy: while the restaurant is open, tops each column of the kitchen
- * screen up to a few tickets. Visitors' own orders count too. At most once a minute per instance.
+ * Keeps the public demo's kitchen busy at any hour: brings the stream of made-up tickets up to
+ * date and moves the ones already on the board on, as a kitchen would. With an order every four
+ * minutes the board always has tickets in every column: at least one New, several Cooking, one
+ * Ready and a few Out for delivery.
+ *
+ * The tickets are marked as demo tickets, due about half an hour after they were placed whatever
+ * the opening hours, and never take kitchen-slot capacity. So the customer side is untouched: a
+ * closed restaurant still shows as closed, and a visitor's order still gets the slot it would
+ * have got on an empty board. Only ever called when DEMO_SEED=true. At most once a minute per
+ * instance, unless forced.
  */
 export async function topUpDemoKitchen(db: Db, now = new Date(), { force = false } = {}) {
-  if (!isOpenNow(now)) return 0
   const last = globalForDemo.dinewiseDemoTopUp ?? 0
-  if (!force && now.getTime() - last < 60_000) return 0
+  if (!force && now.getTime() >= last && now.getTime() - last < 60_000) return 0
   globalForDemo.dinewiseDemoTopUp = now.getTime()
 
-  const rng = random(`${now.getTime()}`)
+  // Tickets already on the board move on by the clock; finished ones leave it.
+  const open = await db
+    .select({ id: orders.id, fulfilment: orders.fulfilment, status: orders.status, at: orders.createdAt })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.demo, true),
+        inArray(orders.status, ['PLACED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY']),
+      ),
+    )
+  for (const ticket of open) await advance(db, ticket, ticket.at, now)
+
+  const due = arrivals(now)
+  const existing = new Set(
+    (
+      await db
+        .select({ at: orders.createdAt })
+        .from(orders)
+        .where(and(eq(orders.demo, true), gte(orders.createdAt, due[0]!)))
+    ).map((o) => o.at.getTime()),
+  )
+  const missing = due.filter((at) => !existing.has(at.getTime()))
+  if (!missing.length) return 0
+
   const menu = (await loadMenu(db)).flatMap((s) => s.items).filter((i) => i.available)
   if (!menu.length) return 0
   const people = await demoCustomers(db)
-  const counts = new Map(
-    (
-      await db
-        .select({ status: orders.status, n: count() })
-        .from(orders)
-        .where(
-          and(
-            inArray(
-              orders.status,
-              LIVE.map(([s]) => s),
-            ),
-            gt(orders.createdAt, minutes(now, -120)),
-          ),
-        )
-        .groupBy(orders.status)
-    ).map((r) => [r.status, r.n]),
-  )
-
-  let added = 0
-  for (const [status, wanted, ago] of LIVE) {
-    for (let i = counts.get(status) ?? 0; i < wanted; i++) {
-      const at = minutes(now, -ago - i)
-      const order = await placeDemoOrder(db, rng, menu, pick(rng, people), at, {
-        online: false,
-        delivery: status === 'OUT_FOR_DELIVERY' || rng() < 0.6,
-      })
-      if (status !== 'PLACED') await advance(db, order, at, status, now)
-      added++
-    }
+  for (const at of missing) {
+    const rng = random(`demo-ticket:${at.getTime()}`)
+    // Every third order is a pickup: with an order every four minutes, Ready is never empty.
+    const delivery = Math.round(at.getTime() / (ARRIVAL_EVERY_MINUTES * 60_000)) % 3 !== 0
+    const dueAt = new Date(Math.ceil(minutes(at, DUE_AFTER_MINUTES).getTime() / 300_000) * 300_000)
+    const order = await placeDemoOrder(db, rng, menu, pick(rng, people), at, {
+      online: rng() < 0.5,
+      delivery,
+      dueAt,
+      now,
+    })
+    await advance(db, order, at, now)
   }
-  return added
+  return missing.length
 }

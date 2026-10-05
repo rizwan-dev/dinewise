@@ -217,6 +217,11 @@ export const orders = pgTable(
     /** The kitchen slot the order is planned for: when it should be ready. */
     slotStart: timestamp('slot_start', { withTimezone: true }).notNull(),
     scheduled: boolean('scheduled').notNull().default(false),
+    /**
+     * A ticket the public demo makes up to keep its kitchen screen busy at any hour (only with
+     * DEMO_SEED). It is due around the time it was placed and never takes kitchen-slot capacity.
+     */
+    demo: boolean('demo').notNull().default(false),
     status: text('status').$type<OrderStatus>().notNull(),
     paymentMethod: text('payment_method', { enum: ['ONLINE', 'ON_DELIVERY'] }).notNull(),
     paymentStatus: text('payment_status', {

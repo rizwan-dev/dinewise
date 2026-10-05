@@ -73,15 +73,22 @@ export async function slotCounts(exec: Executor, now: Date, slotStart?: Date): P
           : gte(orders.slotStart, new Date(now.getTime() - 60 * 60_000)),
         notInArray(orders.status, RELEASED),
         or(sql`${orders.status} <> 'AWAITING_PAYMENT'`, gt(orders.paymentDueAt, now)),
+        // The demo's made-up tickets never take a slot a real customer could have.
+        eq(orders.demo, false),
       ),
     )
     .groupBy(orders.slotStart)
   return new Map(rows.map((r) => [r.slot.getTime(), r.n]))
 }
 
+/**
+ * `demoDueAt` is for the public demo's own tickets only (see demo-activity): the order is due
+ * then, is marked as a demo ticket, and skips the kitchen slots, so it never takes their capacity.
+ */
 export async function placeOrder(
   { db, gateway, now = new Date() }: Deps,
   input: PlaceOrderInput,
+  { demoDueAt }: { demoDueAt?: Date } = {},
 ): Promise<PlacedOrder> {
   if (input.paymentMethod === 'ONLINE' && !gateway) {
     throw new AppError(
@@ -128,7 +135,7 @@ export async function placeOrder(
       couponContext,
     })
 
-    const slotStart = await claimSlot(tx, input.slot, now)
+    const slotStart = demoDueAt ?? (await claimSlot(tx, input.slot, now))
     const online = input.paymentMethod === 'ONLINE'
     const status: OrderStatus = online ? 'AWAITING_PAYMENT' : 'PLACED'
 
@@ -143,6 +150,7 @@ export async function placeOrder(
         address: input.fulfilment === 'DELIVERY' ? input.address : null,
         slotStart,
         scheduled: input.slot !== 'ASAP',
+        demo: demoDueAt !== undefined,
         status,
         paymentMethod: input.paymentMethod,
         paymentStatus: online ? 'PENDING' : 'NOT_REQUIRED',

@@ -440,7 +440,7 @@ const MENU: { name: string; items: SeedItem[] }[] = [
   },
 ]
 
-/** Dishes with a photo in public/menu (free Pexels photos; credits in the README). */
+/** Dishes with a photo in public/menu (free Pexels and Wikimedia Commons photos; credits in the README). */
 const PHOTOS = new Set([
   'aloo-paratha',
   'amritsari-fish',
@@ -459,10 +459,12 @@ const PHOTOS = new Set([
   'gajar-halwa',
   'garlic-naan',
   'gulab-jamun',
+  'hara-bhara-kebab',
   'jeera-rice',
   'kadai-mushroom',
   'kulfi',
   'laccha-paratha',
+  'malai-kofta',
   'mango-lassi',
   'masala-chaas',
   'masala-chai',
