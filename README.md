@@ -182,8 +182,8 @@ cd e2e && pnpm install && pnpm exec playwright install chromium && pnpm test
 ### Deploy on Vercel
 
 The same code runs as serverless functions, with Neon Postgres from the Vercel Marketplace. Set
-the project's Root Directory to `web`; `vercel.json` places the functions next to the database
-and schedules the daily job. What changes on serverless hosting, and why:
+the project's Root Directory to `web`; `vercel.json` places the functions next to the database.
+What changes on serverless hosting, and why:
 
 - **Migrations run once per deploy** (`pnpm vercel-build`), over the direct connection
   (`DATABASE_URL_UNPOOLED`), not on every cold start. Preview builds skip them, because they
@@ -191,11 +191,13 @@ and schedules the daily job. What changes on serverless hosting, and why:
 - **Live updates** use the same NOTIFY → Server-Sent Events path. Each stream ends after
   4½ minutes, inside the function's time limit, and the browser reconnects and catches up.
   Pages listen only while their tab is visible.
-- **Housekeeping** runs when the pages that need it are loaded, at most once a minute, and from
-  a daily cron (`/api/cron/daily`, authorised by `CRON_SECRET`).
+- **Housekeeping** runs when the pages that need it are loaded, at most once a minute. There is
+  no scheduled job.
 - **Photo uploads are off**, because a function has no disk that outlives the request.
-- A public demo sets `DEMO_DAILY_RESET=true`: the daily job wipes it and seeds it again, since
-  anyone can sign in as the manager.
+- **Resetting a public demo is manual.** Anyone can sign in as its manager, so now and then it
+  is worth wiping it back to the seed. With `DEMO_DAILY_RESET=true` set, call the reset
+  endpoint with the secret:
+  `curl -H "Authorization: Bearer <CRON_SECRET>" https://<your-domain>/api/cron/daily`.
 
 ## Tests
 
