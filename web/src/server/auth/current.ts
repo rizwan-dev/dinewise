@@ -38,9 +38,8 @@ export async function endSession(kind: SessionKind) {
 
 export type CurrentCustomer = { id: number; phone: string; name: string | null }
 
-export const getCustomer = cache(async (): Promise<CurrentCustomer | null> => {
-  const token = (await cookies()).get(COOKIE.CUSTOMER)?.value
-  if (!token) return null
+/** The customer a session token belongs to, from a cookie or an API bearer token alike. */
+export async function customerForToken(token: string): Promise<CurrentCustomer | null> {
   const session = await findSession(db(), 'CUSTOMER', token)
   if (!session) return null
   const [row] = await db()
@@ -48,6 +47,11 @@ export const getCustomer = cache(async (): Promise<CurrentCustomer | null> => {
     .from(customers)
     .where(eq(customers.id, session.subjectId))
   return row ?? null
+}
+
+export const getCustomer = cache(async (): Promise<CurrentCustomer | null> => {
+  const token = (await cookies()).get(COOKIE.CUSTOMER)?.value
+  return token ? customerForToken(token) : null
 })
 
 export async function requireCustomer(next: string): Promise<CurrentCustomer> {
@@ -58,9 +62,8 @@ export async function requireCustomer(next: string): Promise<CurrentCustomer> {
 
 export type CurrentStaff = { id: number; name: string; email: string; role: StaffRole }
 
-export const getStaff = cache(async (): Promise<CurrentStaff | null> => {
-  const token = (await cookies()).get(COOKIE.STAFF)?.value
-  if (!token) return null
+/** The active staff member a session token belongs to, from a cookie or a bearer token alike. */
+export async function staffForToken(token: string): Promise<CurrentStaff | null> {
   const session = await findSession(db(), 'STAFF', token)
   if (!session) return null
   const [row] = await db()
@@ -68,13 +71,23 @@ export const getStaff = cache(async (): Promise<CurrentStaff | null> => {
     .from(staff)
     .where(and(eq(staff.id, session.subjectId), eq(staff.active, true)))
   return row ?? null
+}
+
+export const getStaff = cache(async (): Promise<CurrentStaff | null> => {
+  const token = (await cookies()).get(COOKIE.STAFF)?.value
+  return token ? staffForToken(token) : null
 })
+
+/** Managers can do everything the kitchen can. */
+export function hasRole(member: CurrentStaff, roles: StaffRole[]): boolean {
+  return roles.length === 0 || roles.includes(member.role) || member.role === 'MANAGER'
+}
 
 /** For staff pages and actions. Managers can do everything the kitchen can. */
 export async function requireStaff(...roles: StaffRole[]): Promise<CurrentStaff> {
   const member = await getStaff()
   if (!member) redirect('/staff/sign-in')
-  if (roles.length > 0 && !roles.includes(member.role) && member.role !== 'MANAGER') {
+  if (!hasRole(member, roles)) {
     redirect('/staff?denied=1')
   }
   return member

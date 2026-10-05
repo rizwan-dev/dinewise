@@ -1,8 +1,9 @@
 import 'server-only'
 import { hash, verify } from '@node-rs/argon2'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import type { Executor } from '@/db/client'
 import { staff } from '@/db/schema'
+import { env } from '../env'
 import { AppError } from '../errors'
 
 export type StaffRole = 'MANAGER' | 'KITCHEN'
@@ -29,4 +30,19 @@ export async function authenticateStaff(exec: Executor, email: string, password:
     throw new AppError('INVALID_CREDENTIALS', 'Email or password is incorrect.')
   }
   return row.id
+}
+
+/**
+ * The seeded demo account for a role, for one-tap sign-in to the demo restaurant. Refused
+ * unless this installation is the demo.
+ */
+export async function demoStaffId(exec: Executor, role: StaffRole): Promise<number> {
+  if (!env().DEMO_SEED) throw new AppError('NOT_DEMO', 'Demo sign-in is only available in the demo.')
+  const email = role === 'MANAGER' ? 'manager@tadkalane.example' : 'kitchen@tadkalane.example'
+  const [member] = await exec
+    .select({ id: staff.id })
+    .from(staff)
+    .where(and(eq(staff.email, email), eq(staff.active, true)))
+  if (!member) throw new AppError('NOT_FOUND', 'The demo staff accounts are not set up yet.')
+  return member.id
 }

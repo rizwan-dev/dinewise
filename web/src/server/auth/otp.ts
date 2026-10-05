@@ -166,3 +166,8 @@ export async function latestSms(exec: Executor, phone: string) {
     .limit(1)
   return row
 }
+
+/** The code in the latest outbox message to a phone: what the demo shows in place of an SMS. */
+export async function outboxCode(exec: Executor, phone: string): Promise<string | null> {
+  return (await latestSms(exec, phone))?.body.slice(0, 6) ?? null
+}
