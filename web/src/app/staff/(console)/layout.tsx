@@ -16,13 +16,14 @@ export default async function StaffLayout({ children }: LayoutProps<'/staff'>) {
     <div className="min-h-dvh bg-stone-100">
       <header className="sticky top-0 z-20 bg-stone-900 text-white">
         <div className="flex items-center justify-between gap-3 px-4 py-2">
-          <div className="flex items-center gap-3">
-            <span className="bg-saffron-600 font-display flex size-9 items-center justify-center rounded-xl font-bold">
+          {/* min-w-0 lets the nav scroll sideways on a phone instead of widening the page. */}
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="bg-saffron-600 font-display flex size-9 shrink-0 items-center justify-center rounded-xl font-bold">
               T
             </span>
             <StaffNav manager={member.role === 'MANAGER'} />
           </div>
-          <form action={staffSignOutAction} className="flex items-center gap-3">
+          <form action={staffSignOutAction} className="flex shrink-0 items-center gap-3">
             <span className="hidden text-sm text-stone-300 sm:inline">{member.name}</span>
             <button
               type="submit"

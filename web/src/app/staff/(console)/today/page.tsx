@@ -83,7 +83,7 @@ export default async function TodayPage() {
         )}
       </section>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <section className="rounded-2xl bg-white p-4">
           <h2 className="mb-3 font-semibold">Best sellers today</h2>
           {sales.topItems.length === 0 ? (
@@ -139,7 +139,7 @@ export default async function TodayPage() {
         </section>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <section className="rounded-2xl bg-white p-4">
           <h2 className="mb-3 font-semibold">Last 7 days</h2>
           <ol className="flex h-40 items-end gap-2" aria-label="Sales over the last 7 days">

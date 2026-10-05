@@ -202,7 +202,7 @@ and schedules the daily job. What changes on serverless hosting, and why:
 | Suite            | What it covers                                                                                                                   |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | Unit (42)        | Pricing and extras, coupons, GST rounding, kitchen slots, tables, order status, Razorpay signatures                              |
-| Integration (38) | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates                        |
+| Integration (43) | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates                        |
 | End to end (8)   | A full order with the kitchen on a tablet and live tracking, a booking, sold out, rejection, a stale coupon, layout and stacking |
 
 ## Photo credits
