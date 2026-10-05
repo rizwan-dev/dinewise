@@ -108,7 +108,7 @@ export async function quoteCart(
     return result(attempt(true), null, unmatched)
   } catch (error) {
     if (error instanceof CouponError) {
-      const couponError = { code: error.code, message: error.message }
+      const couponError = { code: `COUPON_${error.code}`, message: error.message }
       try {
         return result(attempt(false), null, couponError)
       } catch (inner) {

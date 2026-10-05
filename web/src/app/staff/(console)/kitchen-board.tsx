@@ -6,7 +6,7 @@ import { moveOrderAction } from '@/app/actions/staff'
 import { LiveRefresh } from '@/components/live-refresh'
 import { Alert, Button } from '@/components/ui'
 import { formatPaise } from '@/domain/money'
-import { KITCHEN_ACTION_LABEL, kitchenNext, type OrderStatus } from '@/domain/order-status'
+import { KITCHEN_ACTION_LABEL, kitchenNext, type OrderStatus, REJECT_REASONS } from '@/domain/order-status'
 import { formatTime } from '@/domain/time'
 import type { KitchenTicket } from '@/server/kitchen'
 
@@ -18,8 +18,6 @@ const COLUMNS: { status: OrderStatus; title: string }[] = [
   { status: 'READY', title: 'Ready' },
   { status: 'OUT_FOR_DELIVERY', title: 'Out' },
 ]
-
-const REASONS = ['Item out of stock', 'Kitchen too busy', 'Outside delivery area', 'Closing soon']
 
 /** A short two-tone chime for new orders, generated rather than loaded from a file. */
 function chime() {
@@ -234,7 +232,7 @@ function TicketCard({ ticket: t, fresh, now }: { ticket: Ticket; fresh: boolean;
         <div className="mt-3 space-y-2">
           <p className="text-sm font-semibold">Why can it not be accepted? The customer sees this.</p>
           <div className="grid grid-cols-2 gap-2">
-            {REASONS.map((r) => (
+            {REJECT_REASONS.map((r) => (
               <Button
                 key={r}
                 variant="secondary"

@@ -88,3 +88,11 @@ export const KITCHEN_ACTION_LABEL: Partial<Record<OrderStatus, string>> = {
   DELIVERED: 'Delivered',
   COLLECTED: 'Collected',
 }
+
+/** The reasons offered when the kitchen rejects an order. The customer sees the one chosen. */
+export const REJECT_REASONS = [
+  'Item out of stock',
+  'Kitchen too busy',
+  'Outside delivery area',
+  'Closing soon',
+] as const
