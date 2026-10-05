@@ -28,10 +28,11 @@ export type Call = {
   body?: unknown
   params?: Record<string, string>
   signal?: AbortSignal
+  headers?: Record<string, string>
 }
 
-export function request(method: string, path: string, { token, body, signal }: Call = {}) {
-  const headers: Record<string, string> = {}
+export function request(method: string, path: string, { token, body, signal, headers: extra }: Call = {}) {
+  const headers: Record<string, string> = { ...extra }
   if (token) headers.authorization = `Bearer ${token}`
   if (body !== undefined) headers['content-type'] = 'application/json'
   return new Request(`http://localhost:3000${path}`, {

@@ -141,10 +141,23 @@ export async function requireStaffToken(request: Request, ...roles: StaffRole[])
 }
 
 /**
- * An absolute URL for a path on this server, such as a dish photo, built from the origin the
- * request came in on, so it works whether the app talks to the public site or a local stack.
+ * An absolute URL for a path on this server, such as a dish photo, on the host the app called,
+ * so it works against the public site and a local stack alike. The request's own URL is not
+ * used: behind Next.js's standalone server it names the bind address (0.0.0.0:3000), not the
+ * host the caller used. Only this caller's own response depends on these headers, and API
+ * responses are never cached.
  */
 export function absoluteUrl(request: Request, path: string | null): string | null {
   if (!path) return null
-  return new URL(path, request.url).toString()
+  return new URL(path, publicOrigin(request)).toString()
+}
+
+function publicOrigin(request: Request): string {
+  const fallback = new URL(request.url)
+  const first = (name: string) => request.headers.get(name)?.split(',')[0]?.trim()
+  const host = first('x-forwarded-host') || first('host') || fallback.host
+  const proto = first('x-forwarded-proto') || fallback.protocol.replace(':', '')
+  return /^[A-Za-z0-9.-]+(:\d+)?$/.test(host) && /^https?$/.test(proto)
+    ? `${proto}://${host}`
+    : fallback.origin
 }

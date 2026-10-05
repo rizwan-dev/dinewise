@@ -62,6 +62,12 @@ describe('GET /api/v1/restaurant, /menu, /offers, /slots', () => {
       ],
     })
     expect(butterChicken.photoUrl).toBe('http://localhost:3000/menu/butter-chicken.webp')
+
+    // Behind a proxy, photo URLs use the host the app called.
+    const proxied = await call(menu.GET, 'GET', '/api/v1/menu', {
+      headers: { 'x-forwarded-host': 'dinewise.example.com', 'x-forwarded-proto': 'https' },
+    })
+    expect(proxied.body.sections[0].items[0].photoUrl).toMatch(/^https:\/\/dinewise\.example\.com\/menu\//)
     const kadai = items.find((i: { name: string }) => i.name === 'Kadai Mushroom')
     expect(kadai.addonGroups[0]).toMatchObject({ name: 'Spice level', minSelect: 1, maxSelect: 1 })
   })
