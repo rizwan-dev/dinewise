@@ -8,8 +8,8 @@ import { resetDemo } from '@/server/seed'
 export const dynamic = 'force-dynamic'
 
 /**
- * The daily job, called by Vercel Cron (see vercel.json) with `Authorization: Bearer
- * $CRON_SECRET`. Runs housekeeping, and on a public demo wipes and re-seeds the restaurant.
+ * Housekeeping plus, on a public demo, a wipe and re-seed of the restaurant. Nothing schedules
+ * it: call it by hand with `Authorization: Bearer $CRON_SECRET` when the demo needs a reset.
  */
 export async function GET(request: Request) {
   const e = env()
