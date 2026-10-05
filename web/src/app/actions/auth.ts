@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { db } from '@/db/client'
 import { customers } from '@/db/schema'
-import { latestSms, requestCode, verifyCode } from '@/server/auth/otp'
+import { outboxCode, requestCode, verifyCode } from '@/server/auth/otp'
 import { endSession, getCustomer, startSession } from '@/server/auth/current'
 import { env } from '@/server/env'
 import { type ActionResult, AppError, toResult } from '@/server/errors'
@@ -21,8 +21,7 @@ export async function sendCodeAction(
       await clientIp(),
     )
     // Demo mode only: there is no SMS provider, so the code is shown on screen instead.
-    const demoCode =
-      env().SMS_MODE === 'outbox' ? ((await latestSms(db(), normalised))?.body.slice(0, 6) ?? null) : null
+    const demoCode = env().SMS_MODE === 'outbox' ? await outboxCode(db(), normalised) : null
     return { phone: normalised, demoCode }
   })
 }

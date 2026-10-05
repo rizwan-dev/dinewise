@@ -8,22 +8,9 @@ import { Alert, Button } from '@/components/ui'
 import { formatPaise } from '@/domain/money'
 import { KITCHEN_ACTION_LABEL, kitchenNext, type OrderStatus } from '@/domain/order-status'
 import { formatTime } from '@/domain/time'
+import type { KitchenTicket } from '@/server/kitchen'
 
-export type Ticket = {
-  id: number
-  code: string
-  status: OrderStatus
-  fulfilment: 'DELIVERY' | 'PICKUP'
-  customerName: string
-  slotStart: string
-  later: boolean
-  paidOnline: boolean
-  totalPaise: number
-  notes: string | null
-  pincode: string | null
-  placedAt: string
-  items: { id: number; quantity: number; name: string; details: string }[]
-}
+export type Ticket = KitchenTicket
 
 const COLUMNS: { status: OrderStatus; title: string }[] = [
   { status: 'PLACED', title: 'New' },

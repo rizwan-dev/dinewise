@@ -8,8 +8,12 @@ import { env } from './env'
  * whatever the client chose to send.
  */
 export async function clientIp(): Promise<string | null> {
+  return clientIpFrom(await headers())
+}
+
+export function clientIpFrom(requestHeaders: Headers): string | null {
   if (!env().TRUST_PROXY) return null
-  const forwarded = (await headers()).get('x-forwarded-for')
+  const forwarded = requestHeaders.get('x-forwarded-for')
   const last = forwarded?.split(',').at(-1)?.trim()
   return last || null
 }
