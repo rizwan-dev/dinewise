@@ -40,9 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Notes the Next.js dev server writes for coding tools
-/AGENTS.md
-/CLAUDE.md
-
 # Uploaded menu photos (a Docker volume in production)
 /uploads
