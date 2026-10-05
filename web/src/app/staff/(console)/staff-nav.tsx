@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 export function StaffNav({ manager }: { manager: boolean }) {
   const pathname = usePathname()
   const links = [
+    ...(manager ? [{ href: '/staff/today', label: 'Today' }] : []),
     { href: '/staff', label: 'Kitchen' },
     { href: '/staff/menu', label: 'Menu' },
     ...(manager

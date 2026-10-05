@@ -1,5 +1,6 @@
 import { pool, db } from '@/db/client'
 import { runMigrations } from '@/db/migrate'
+import { seedDemoActivity } from './demo-activity'
 import { env, serverless } from './env'
 import { housekeep } from './housekeeping'
 import { seedDemo } from './seed'
@@ -15,8 +16,12 @@ import { seedDemo } from './seed'
 export async function boot() {
   const e = env() // throws with a readable list if configuration is wrong
   if (!serverless()) await runMigrations(pool())
-  if (e.DEMO_SEED && (await seedDemo(db(), e.DEMO_STAFF_PASSWORD!))) {
-    console.log('Demo restaurant created: manager@tadkalane.example and kitchen@tadkalane.example')
+  if (e.DEMO_SEED) {
+    if (await seedDemo(db(), e.DEMO_STAFF_PASSWORD!)) {
+      console.log('Demo restaurant created: manager@tadkalane.example and kitchen@tadkalane.example')
+    }
+    const activity = await seedDemoActivity(db())
+    if (activity.orders) console.log(`Demo week created: ${activity.orders} orders, ${activity.bookings} bookings`)
   }
   if (serverless()) return
 

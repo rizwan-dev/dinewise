@@ -82,6 +82,71 @@ const MENU: { name: string; items: SeedItem[] }[] = [
         price: 90,
         veg: true,
       },
+      {
+        name: 'Veg Samosa',
+        description: 'Two crisp pastries filled with spiced potato and peas, with tamarind and mint chutney.',
+        price: 80,
+        veg: true,
+        spice: 1,
+      },
+      {
+        name: 'Tandoori Chicken',
+        description: 'Bone-in chicken marinated overnight in yoghurt and Kashmiri chilli, roasted in the tandoor.',
+        veg: false,
+        spice: 2,
+        bestseller: true,
+        variants: [
+          ['Half', 300],
+          ['Full', 540],
+        ],
+      },
+    ],
+  },
+  {
+    name: 'Combos & Thalis',
+    items: [
+      {
+        name: 'Tadka Lane Thali',
+        description:
+          'Dal makhani, paneer of the day, seasonal sabzi, jeera rice, salad, raita, pickle and a dessert.',
+        price: 340,
+        veg: true,
+        bestseller: true,
+        groups: [
+          {
+            name: 'Bread',
+            min: 1,
+            max: 1,
+            options: [
+              ['2 Tawa roti', 0],
+              ['Butter naan', 30],
+              ['Laccha paratha', 40],
+            ],
+          },
+        ],
+      },
+      {
+        name: 'Butter Chicken Combo',
+        description: 'Butter chicken (half), two butter naan, jeera rice, salad and a gulab jamun.',
+        price: 449,
+        veg: false,
+        spice: 1,
+        bestseller: true,
+      },
+      {
+        name: 'Paneer Combo',
+        description: 'Paneer butter masala, dal makhani, two butter naan, jeera rice and salad.',
+        price: 399,
+        veg: true,
+        spice: 1,
+      },
+      {
+        name: 'Biryani Combo',
+        description: 'Chicken dum biryani (half) with raita, mirchi salan, a boiled egg and a gulab jamun.',
+        price: 349,
+        veg: false,
+        spice: 2,
+      },
     ],
   },
   {
@@ -100,6 +165,34 @@ const MENU: { name: string; items: SeedItem[] }[] = [
         price: 300,
         veg: true,
         spice: 1,
+      },
+      {
+        name: 'Palak Paneer',
+        description: 'Paneer in a smooth spinach gravy finished with garlic tadka and a little cream.',
+        price: 290,
+        veg: true,
+        spice: 1,
+      },
+      {
+        name: 'Malai Kofta',
+        description: 'Paneer and potato dumplings in a mild, creamy cashew gravy.',
+        price: 310,
+        veg: true,
+      },
+      {
+        name: 'Rajma Chawal',
+        description: 'Punjabi kidney-bean curry with steamed basmati, onion and lime. Sunday comfort.',
+        price: 230,
+        veg: true,
+        spice: 1,
+      },
+      {
+        name: 'Egg Curry',
+        description: 'Two boiled eggs, lightly fried, in an onion-tomato masala.',
+        price: 240,
+        veg: false,
+        spice: 2,
+        groups: [SPICE_CHOICE],
       },
       {
         name: 'Kadai Mushroom',
@@ -129,24 +222,42 @@ const MENU: { name: string; items: SeedItem[] }[] = [
         spice: 2,
         groups: [SPICE_CHOICE],
       },
+    ],
+  },
+  {
+    name: 'Street Favourites',
+    items: [
       {
-        name: 'Tadka Lane Thali',
-        description:
-          'Dal makhani, paneer of the day, seasonal sabzi, jeera rice, salad, raita, pickle and a dessert.',
-        price: 340,
+        name: 'Chole Bhature',
+        description: 'Spicy Pindi chole with two fluffy bhature, pickled onion and green chilli.',
+        price: 220,
         veg: true,
+        spice: 2,
+        bestseller: true,
+      },
+      {
+        name: 'Pav Bhaji',
+        description: 'Buttery mashed-vegetable bhaji with two toasted pav, onion and lime.',
+        price: 190,
+        veg: true,
+        spice: 1,
         groups: [
           {
-            name: 'Bread',
-            min: 1,
-            max: 1,
+            name: 'Extras',
+            min: 0,
+            max: 2,
             options: [
-              ['2 Tawa roti', 0],
-              ['Butter naan', 30],
-              ['Laccha paratha', 40],
+              ['Extra pav', 30],
+              ['Cheese on top', 40],
             ],
           },
         ],
+      },
+      {
+        name: 'Aloo Paratha',
+        description: 'Two whole-wheat parathas stuffed with spiced potato, with white butter, curd and pickle.',
+        price: 170,
+        veg: true,
       },
     ],
   },
@@ -246,6 +357,15 @@ const MENU: { name: string; items: SeedItem[] }[] = [
         price: 150,
         veg: true,
       },
+      {
+        name: 'Kulfi',
+        description: 'Dense, slow-reduced milk ice cream.',
+        veg: true,
+        variants: [
+          ['Malai', 90],
+          ['Kesar pista', 110],
+        ],
+      },
     ],
   },
   {
@@ -258,6 +378,30 @@ const MENU: { name: string; items: SeedItem[] }[] = [
         variants: [
           ['Regular', 90],
           ['Large', 130],
+        ],
+      },
+      {
+        name: 'Mango Lassi',
+        description: 'Alphonso mango pulp churned with yoghurt.',
+        veg: true,
+        bestseller: true,
+        variants: [
+          ['Regular', 120],
+          ['Large', 160],
+        ],
+      },
+      {
+        name: 'Cold Coffee',
+        description: 'Blended with milk and ice; add a scoop of vanilla ice cream if you like.',
+        price: 140,
+        veg: true,
+        groups: [
+          {
+            name: 'Extras',
+            min: 0,
+            max: 1,
+            options: [['Ice cream scoop', 40]],
+          },
         ],
       },
       {
@@ -296,30 +440,45 @@ const MENU: { name: string; items: SeedItem[] }[] = [
 
 /** Dishes with a photo in public/menu (free Pexels photos; credits in the README). */
 const PHOTOS = new Set([
+  'aloo-paratha',
   'amritsari-fish',
+  'biryani-combo',
   'butter-chicken',
+  'butter-chicken-combo',
   'butter-naan',
   'chicken-dum-biryani',
   'chicken-tikka',
+  'chole-bhature',
+  'cold-coffee',
   'dal-khichdi',
   'dal-makhani',
+  'egg-curry',
   'fresh-lime-soda',
+  'gajar-halwa',
   'garlic-naan',
   'gulab-jamun',
   'jeera-rice',
   'kadai-mushroom',
+  'kulfi',
   'laccha-paratha',
+  'mango-lassi',
   'masala-chaas',
   'masala-chai',
   'masala-papad',
   'mutton-rogan-josh',
+  'palak-paneer',
   'paneer-butter-masala',
+  'paneer-combo',
   'paneer-tikka',
+  'pav-bhaji',
+  'rajma-chawal',
   'rasmalai',
   'sweet-lassi',
   'tadka-lane-thali',
+  'tandoori-chicken',
   'tandoori-roti',
   'veg-dum-biryani',
+  'veg-samosa',
 ])
 
 const slug = (s: string) =>
