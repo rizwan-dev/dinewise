@@ -16,8 +16,9 @@ the database.
 Indian mobile number (the code is shown on screen). To see the restaurant's side, open
 [`/staff`](https://dinewise.riztechacademy.com/staff) and tap **Try as kitchen** or **Try as
 manager**, or sign in as `kitchen@tadkalane.example` or `manager@tadkalane.example`, password
-`tadka-demo-2026`. Payments are Razorpay test mode, so no real money moves. The demo resets every
-night to a busy day: a week of past orders, today's bookings and tickets on the kitchen screen.
+`tadka-demo-2026`. Payments are Razorpay test mode, so no real money moves. The demo starts as a
+busy day: a week of past orders and today's bookings. Its kitchen screen has made-up orders coming
+in and moving along at any hour, even when the restaurant is closed to customers.
 
 <p>
   <img src="docs/screenshots/phone-home.png" width="24%" alt="Home page on a phone">
