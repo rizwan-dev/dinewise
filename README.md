@@ -30,7 +30,7 @@ in and moving along at any hour, even when the restaurant is closed to customers
 ![The kitchen screen on a tablet](docs/screenshots/tablet-kitchen.png)
 
 _The demo runs Tadka Lane, a fictional North Indian restaurant in Pune. Dish photos are free
-stock photos from Pexels (credited below)._
+photos from Pexels and Wikimedia Commons (credited below)._
 
 ## What to look at
 
@@ -215,13 +215,13 @@ What changes on serverless hosting, and why:
 | Suite            | What it covers                                                                                                                       |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Unit (42)        | Pricing and extras, coupons, GST rounding, kitchen slots, tables, order status, Razorpay signatures                                  |
-| Integration (69) | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates, every mobile API endpoint |
+| Integration (74) | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates, every mobile API endpoint |
 | End to end (8)   | A full order with the kitchen on a tablet and live tracking, a booking, sold out, rejection, a stale coupon, layout and stacking     |
 
 ## Photo credits
 
-Free photos from [Pexels](https://www.pexels.com/license/), resized for the demo. Hara Bhara
-Kebab and Malai Kofta use an illustration because no honest match was available.
+Free photos, resized and cropped for the demo: from [Pexels](https://www.pexels.com/license/)
+in the table, and from Wikimedia Commons in the list after it.
 
 | Dish                 | Photo                                            |
 | -------------------- | ------------------------------------------------ |
@@ -233,7 +233,6 @@ Kebab and Malai Kofta use an illustration because no honest match was available.
 | Butter Naan          | [Pexels](https://www.pexels.com/photo/12737662/) |
 | Chicken Dum Biryani  | [Pexels](https://www.pexels.com/photo/4224304/)  |
 | Chicken Tikka        | [Pexels](https://www.pexels.com/photo/6522616/)  |
-| Chole Bhature        | [Pexels](https://www.pexels.com/photo/36388454/) |
 | Cold Coffee          | [Pexels](https://www.pexels.com/photo/4869290/)  |
 | Dal Khichdi          | [Pexels](https://www.pexels.com/photo/6363498/)  |
 | Dal Makhani          | [Pexels](https://www.pexels.com/photo/37182514/) |
@@ -266,6 +265,18 @@ Kebab and Malai Kofta use an illustration because no honest match was available.
 | Veg Dum Biryani      | [Pexels](https://www.pexels.com/photo/9738983/)  |
 | Veg Samosa           | [Pexels](https://www.pexels.com/photo/9027521/)  |
 
+From Wikimedia Commons, under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The
+resized versions in `web/public/menu` are shared under the same licence.
+
+- Chole Bhature: [Chole Bhature-Noida-UP-SP002](https://commons.wikimedia.org/wiki/File:Chole_Bhature-Noida-UP-SP002.jpg)
+  by Sutapa Pal
+- Hara Bhara Kebab: [Hara Bhara Kabab](https://commons.wikimedia.org/wiki/File:Hara_Bhara_Kabab.JPG)
+  by Manjula Bharath
+- Malai Kofta: [MalaiKofta](https://commons.wikimedia.org/wiki/File:MalaiKofta.jpg) by
+  Monali.mishra
+
 ## Licence
 
-Code: [MIT](LICENSE) © Rizwanul Haque. Photos: under the [Pexels licence](https://www.pexels.com/license/).
+Code: [MIT](LICENSE) © Rizwanul Haque. Photos: under the [Pexels licence](https://www.pexels.com/license/),
+except the three from Wikimedia Commons, which are under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
