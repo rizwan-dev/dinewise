@@ -35,8 +35,10 @@ export async function staffPage(browser: Browser, email = 'kitchen@tadkalane.exa
 export async function ticket(page: Page, code: string) {
   const later = page.getByText(/Scheduled for later/)
   if (await later.isVisible()) {
-    const details = page.locator('details')
-    if (!(await details.getAttribute('open'))) await later.click()
+    // Read the live property: an open <details> has open="", which is falsy, so testing the
+    // attribute would click the summary again and fold the ticket away.
+    const open = await page.locator('details').evaluate((d) => (d as HTMLDetailsElement).open)
+    if (!open) await later.click()
   }
   return page.getByRole('listitem').filter({ hasText: code })
 }

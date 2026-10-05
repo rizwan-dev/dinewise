@@ -63,7 +63,7 @@ test('a rejected order tells the customer why', async ({ page, browser }) => {
 test('a remembered coupon that no longer applies does not block the order', async ({ page }) => {
   await signInCustomer(page)
   await page.goto('/menu')
-  await page.getByRole('button', { name: 'Add Butter Chicken' }).click()
+  await page.getByRole('button', { name: 'Add Butter Chicken', exact: true }).click()
   await page
     .getByRole('dialog')
     .getByRole('button', { name: /^Add ·/ })
