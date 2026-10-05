@@ -87,6 +87,11 @@ export function env(): Env {
   return cached
 }
 
+/** For tests: read the environment again on the next call. */
+export function resetEnvForTests() {
+  cached = undefined
+}
+
 /**
  * Running as serverless functions (Vercel) rather than a long-lived server: no timers between
  * requests and no disk that outlives one.
