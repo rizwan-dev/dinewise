@@ -114,6 +114,15 @@ The allowed moves, and who may make each one, live in one state machine
 same services as real ones ([`demo-activity.ts`](web/src/server/demo-activity.ts)), so they obey
 the same slot capacity, pricing and status rules.
 
+## Mobile API
+
+A versioned JSON API under `/api/v1` serves the Dinewise mobile app: the menu, quotes, sign-in by
+one-time code, cash orders with live tracking, and the kitchen board for staff. It calls the same
+server code as the website, so a quote is the web bill and a kitchen move obeys the same state
+machine. Sign-in returns a bearer token, stored hashed in the same sessions table as the
+website's cookies. **The contract, with an example for every endpoint, is
+[`docs/api.md`](docs/api.md).**
+
 ## Architecture
 
 ```mermaid
@@ -133,6 +142,7 @@ flowchart LR
 | `web/drizzle`        | Migrations, including the hand-written constraints and the notify trigger |
 | `web/src/app/(shop)` | The customer's pages                                                      |
 | `web/src/app/staff`  | Kitchen, menu, bookings and sales                                         |
+| `web/src/app/api/v1` | The mobile app's JSON API ([contract](docs/api.md))                       |
 | `web/tests`          | Services against real PostgreSQL in Testcontainers                        |
 | `e2e`                | Playwright on an emulated Pixel 7 against the Docker stack                |
 
@@ -199,11 +209,11 @@ and schedules the daily job. What changes on serverless hosting, and why:
 
 ## Tests
 
-| Suite            | What it covers                                                                                                                   |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Unit (42)        | Pricing and extras, coupons, GST rounding, kitchen slots, tables, order status, Razorpay signatures                              |
-| Integration (43) | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates                        |
-| End to end (8)   | A full order with the kitchen on a tablet and live tracking, a booking, sold out, rejection, a stale coupon, layout and stacking |
+| Suite            | What it covers                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit (42)        | Pricing and extras, coupons, GST rounding, kitchen slots, tables, order status, Razorpay signatures                                  |
+| Integration (69) | Slot capacity and coupon races, payments applied once and refunds, one-time codes, bookings, live updates, every mobile API endpoint |
+| End to end (8)   | A full order with the kitchen on a tablet and live tracking, a booking, sold out, rejection, a stale coupon, layout and stacking     |
 
 ## Photo credits
 
